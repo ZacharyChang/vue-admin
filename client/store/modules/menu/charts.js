@@ -36,6 +36,11 @@ export default {
       name: 'Plotly',
       path: 'plotly',
       component: lazyLoading('charts/Plotly')
+    },
+    {
+      name: 'UserNumber',
+      path: 'userNumber',
+      component: lazyLoading('charts/UserNumber')
     }
   ]
 }
