@@ -92,6 +92,7 @@
               <th></th>
             </tr>
             </thead>
+            <tbody>
             <tr>
               <td>Misty Abbott</td>
               <td>Bass Guitar</td>
@@ -183,17 +184,6 @@ export default {
         '#97cd76'
       ]
     }
-  },
-
-  mounted () {
-    const { checkIn, checkOut } = this.$refs
-    checkIn.datepicker.set('onChange', (d) => {
-      checkOut.datepicker.set('minDate', d.fp_incr(1))
-    })
-
-    checkOut.datepicker.set('onChange', (d) => {
-      checkIn.datepicker.set('maxDate', d)
-    })
   },
 
   computed: {
