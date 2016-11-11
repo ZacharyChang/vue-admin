@@ -278,11 +278,10 @@ export default {
 
   methods: {
     updateValue (val) {
-      this.isCompare=val;
+      this.isCompare = val
     }
   }
 }
-
 
 </script>
 
@@ -290,6 +289,5 @@ export default {
 .js-plotly-plot {
   max-width: 100%;
 }
-
 
 </style>
