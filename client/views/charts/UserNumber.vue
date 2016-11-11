@@ -5,9 +5,21 @@
         <article class="tile is-child box">
           <h1 class="title">Conditions</h1>
           <div class="columns">
-            <div class="column">
+            <div class="column is-3">
               <p class="control">
                 <label class="label">Date:</label>
+                <datepicker placeholder="Pick date and time" :config="{ enableTime: true }"></datepicker>
+              </p>
+            </div>
+            <div class="column is-1">
+              <p class="control">
+                <label class="label">Compare</label>
+                <vb-switch type="primary" size="medium" :checked="isCompare" @change="updateValue"></vb-switch>
+              </p>
+            </div>
+            <div class="column is-3" v-show="isCompare">
+              <p class="control">
+                <label class="label">Compare Date:</label>
                 <datepicker placeholder="Pick date and time" :config="{ enableTime: true }"></datepicker>
               </p>
             </div>
@@ -34,6 +46,8 @@
                 </a>
               </p>
             </div>
+          </div>
+          <div class="columns">
             <div class="column">
               <p class="control">
                 <label class="label">Manufacturer:</label>
@@ -74,8 +88,38 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent">
         <article class="tile is-child box">
+          <nav class="level">
+            <div class="level-item has-text-centered">
+              <p class="heading">Tweets</p>
+              <p class="title">3,456</p>
+            </div>
+            <div class="level-item has-text-centered">
+              <p class="heading">Following</p>
+              <p class="title">123</p>
+            </div>
+            <div class="level-item has-text-centered">
+              <p class="heading">Followers</p>
+              <p class="title">456K</p>
+            </div>
+            <div class="level-item has-text-centered">
+              <p class="heading">Likes</p>
+              <p class="title">789</p>
+            </div>
+          </nav>
+        </article>
+      </div>
+    </div>
+    <div class="tile is-ancestor">
+      <div class="tile is-parent is-6">
+        <article class="tile is-child box" style="height:300px">
           <h4 class="title">ANIMATED BARS</h4>
           <chart :type="'line'" :data="waveData" :options="options"></chart>
+        </article>
+      </div>
+      <div class="tile is-parent is-6">
+        <article class="tile is-child box" style="height:300px">
+          <h4 class="title">ANIMATED BARS</h4>
+          <chart :type="'bar'" :data="waveData" :options="options"></chart>
         </article>
       </div>
     </div>
@@ -160,17 +204,19 @@
 <script>
 import Datepicker from 'vue-bulma-datepicker'
 import Chart from 'vue-bulma-chartjs'
+import VbSwitch from 'vue-bulma-switch'
 
 export default {
 
   components: {
     Datepicker,
-    Chart
+    Chart,
+    VbSwitch
   },
 
   data () {
     return {
-      value: '2016-12-12',
+      isCompare: false,
       options: {
         segmentShowStroke: false
       },
@@ -228,8 +274,15 @@ export default {
     value (newVal, oldVal) {
       console.log(newVal, oldVal)
     }
+  },
+
+  methods: {
+    updateValue (val) {
+      this.isCompare=val;
+    }
   }
 }
+
 
 </script>
 
@@ -237,5 +290,6 @@ export default {
 .js-plotly-plot {
   max-width: 100%;
 }
+
 
 </style>
