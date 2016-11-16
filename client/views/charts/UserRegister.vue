@@ -8,7 +8,12 @@
             <div class="column is-3">
               <p class="control">
                 <label class="label">Date:</label>
-                <datepicker placeholder="Pick date and time" :config="{ enableTime: true }"></datepicker>
+                <el-date-picker
+                  v-model="dateRange"
+                  type="daterange"
+                  placeholder="Select Time Range."
+                  style="width:80%">
+                </el-date-picker>
               </p>
             </div>
             <div class="column is-1">
@@ -21,7 +26,12 @@
               <div class="column is-3" v-show="isCompare">
                 <p class="control">
                   <label class="label">Compare Date:</label>
-                  <datepicker placeholder="Pick date and time" :config="{ enableTime: true }"></datepicker>
+                  <el-date-picker
+                    v-model="compareDateRange"
+                    type="daterange"
+                    placeholder="Select Compare Time Range."
+                    style="width:80%">
+                  </el-date-picker>
                 </p>
               </div>
             </transition>
@@ -30,22 +40,22 @@
             <div class="column">
               <p class="control">
                 <label class="label">Interval:</label>
-                <a class="button">
-              <span class="icon is-small">
-                <i class="fa fa-align-left"></i>
-              </span>
+                <a class="button" :class="{ 'is-primary': isMonthActive }" @click="interval='month'">
+                  <span class="icon is-small">
+                    <i class="fa fa-align-left"></i>
+                  </span>
                   <span>Month</span>
                 </a>
-                <a class="button">
-              <span class="icon is-small">
-                <i class="fa fa-align-center"></i>
-              </span>
+                <a class="button" :class="{ 'is-primary': isWeekActive }" @click="interval='week'">
+                  <span class="icon is-small">
+                    <i class="fa fa-align-center"></i>
+                  </span>
                   <span>Week</span>
                 </a>
-                <a class="button">
-              <span class="icon is-small">
-                <i class="fa fa-align-right"></i>
-              </span>
+                <a class="button" :class="{ 'is-primary': isDayActive }" @click="interval='day'">
+                  <span class="icon is-small">
+                    <i class="fa fa-align-right"></i>
+                  </span>
                   <span>Day</span>
                 </a>
               </p>
@@ -114,14 +124,14 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
-          <h4 class="title">User Register Count</h4>
-          <chart :type="'line'" :data="waveData" :options="options"></chart>
+          <h4 class="title">User Register Percent</h4>
+          <chart :type="'pie'" :data="waveData" :options="options"></chart>
         </article>
       </div>
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
-          <h4 class="title">ANIMATED BARS</h4>
-          <chart :type="'bar'" :data="waveData" :options="options"></chart>
+          <h4 class="title">User Register Count</h4>
+          <chart :type="'line'" :data="waveData" :options="options"></chart>
         </article>
       </div>
     </div>
@@ -219,6 +229,9 @@ export default {
   data () {
     return {
       isCompare: false,
+      dateRange: null,
+      compareDateRange: null,
+      interval: 'week',
       options: {
         segmentShowStroke: false
       },
@@ -235,16 +248,14 @@ export default {
   },
 
   computed: {
-    today () {
-      return new Date()
+    isMonthActive () {
+      return this.interval === 'month'
     },
-    maxDate () {
-      let d = new Date()
-      d.setDate(32)
-      return d
+    isWeekActive () {
+      return this.interval === 'week'
     },
-    placeholder () {
-      return `minDate: today, maxDate: ${this.maxDate.getFullYear()}-${this.maxDate.getMonth() + 1}-${this.maxDate.getDate()}`
+    isDayActive () {
+      return this.interval === 'day'
     },
     // https://github.com/chmln/flatpickr/blob/gh-pages/src/flatpickr.l10n.zh.js
     l10n () {
@@ -281,14 +292,12 @@ export default {
   methods: {
     updateValue (val) {
       this.isCompare = val
+      if (val === true) {
+        this.compareDateRange = null
+      }
     }
   }
 }
-
-
-
-
-
 
 </script>
 
@@ -298,7 +307,7 @@ export default {
 }
 
 .slide-fade-enter-active {
-  transition: all .3s ease;
+  transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
 }
 .slide-fade-leave-active {
   transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
@@ -307,9 +316,5 @@ export default {
   padding-left: 10px;
   opacity: 0;
 }
-
-
-
-
 
 </style>
