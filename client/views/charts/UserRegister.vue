@@ -125,15 +125,18 @@
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
           <h4 class="title">User Register Percent</h4>
-          <chart :type="'pie'" :data="waveData" :options="options"></chart>
+          <!--<chart :type="'pie'" :data="waveData" :options="options"></chart>-->
+          <echart :options="pie"></echart>
         </article>
       </div>
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
           <h4 class="title">User Register Count</h4>
-          <chart :type="'line'" :data="waveData" :options="options"></chart>
+          <!--<chart :type="'line'" :data="waveData" :options="options"></chart>-->
+          <echart :options="line"></echart>
         </article>
       </div>
+      <div id="main" style="width: 600px;height:400px;"></div>
     </div>
     <div class="tile is-ancestor">
       <div class="tile is-parent">
@@ -217,16 +220,25 @@
 import Datepicker from 'vue-bulma-datepicker'
 import Chart from 'vue-bulma-chartjs'
 import VbSwitch from 'vue-bulma-switch'
+import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
 
 export default {
 
   components: {
     Datepicker,
     Chart,
-    VbSwitch
+    VbSwitch,
+    echart: ECharts
   },
 
   data () {
+    let data = []
+
+    for (let i = 0; i <= 360; i++) {
+      let t = i / 180 * Math.PI
+      let r = Math.sin(2 * t) * Math.cos(2 * t)
+      data.push([r, i])
+    }
     return {
       isCompare: false,
       dateRange: null,
@@ -243,6 +255,13 @@ export default {
         '#42afe3',
         '#ed6c63',
         '#97cd76'
+      ],
+      lineData: [
+        '2009/6/12 2:00', '2009/6/12 3:00', '2009/6/12 4:00', '2009/6/12 5:00', '2009/6/12 6:00', '2009/6/12 7:00', '2009/6/12 8:00', '2009/6/12 9:00', '2009/6/12 10:00', '2009/6/12 11:00', '2009/6/12 12:00', '2009/6/12 13:00', '2009/6/12 14:00', '2009/6/12 15:00', '2009/6/12 16:00', '2009/6/12 17:00', '2009/6/12 18:00', '2009/6/12 19:00', '2009/6/12 20:00', '2009/6/12 21:00', '2009/6/12 22:00', '2009/6/12 23:00',
+        '2009/6/13 0:00', '2009/6/13 1:00', '2009/6/13 2:00', '2009/6/13 3:00', '2009/6/13 4:00', '2009/6/13 5:00', '2009/6/13 6:00', '2009/6/13 7:00', '2009/6/13 8:00', '2009/6/13 9:00', '2009/6/13 10:00', '2009/6/13 11:00', '2009/6/13 12:00', '2009/6/13 13:00', '2009/6/13 14:00', '2009/6/13 15:00', '2009/6/13 16:00', '2009/6/13 17:00', '2009/6/13 18:00', '2009/6/13 19:00', '2009/6/13 20:00', '2009/6/13 21:00', '2009/6/13 22:00', '2009/6/13 23:00',
+        '2009/6/14 0:00', '2009/7/16 6:00', '2009/7/16 7:00', '2009/7/16 8:00', '2009/7/16 9:00', '2009/7/16 10:00', '2009/7/16 11:00', '2009/7/16 12:00', '2009/7/16 13:00', '2009/7/16 14:00', '2009/7/16 15:00', '2009/7/16 16:00', '2009/7/16 17:00', '2009/7/16 18:00', '2009/7/16 19:00', '2009/7/16 20:00', '2009/7/16 21:00', '2009/7/16 22:00', '2009/7/16 23:00',
+        '2009/7/17 0:00', '2009/7/17 1:00', '2009/7/17 2:00', '2009/7/17 3:00', '2009/7/17 4:00', '2009/7/17 5:00', '2009/7/17 6:00', '2009/7/17 7:00', '2009/7/17 8:00', '2009/7/17 9:00', '2009/7/17 10:00', '2009/7/17 11:00', '2009/7/17 12:00', '2009/7/17 13:00', '2009/7/17 14:00', '2009/7/17 15:00', '2009/7/17 16:00', '2009/7/17 17:00', '2009/7/17 18:00', '2009/7/17 19:00', '2009/7/17 20:00', '2009/7/17 21:00', '2009/7/17 22:00', '2009/7/17 23:00',
+        '2009/7/18 0:00', '2009/10/1 6:00', '2009/10/1 7:00', '2009/10/1 8:00', '2009/10/1 9:00', '2009/10/1 10:00', '2009/10/1 11:00', '2009/10/1 12:00', '2009/10/1 13:00', '2009/10/1 14:00', '2009/10/1 15:00', '2009/10/1 16:00', '2009/10/1 17:00', '2009/10/1 18:00', '2009/10/1 19:00', '2009/10/1 20:00', '2009/10/1 21:00', '2009/10/1 22:00', '2009/10/1 23:00', '2009/10/2 0:00', '2009/10/2 1:00', '2009/10/2 2:00', '2009/10/2 3:00', '2009/10/2 4:00'
       ]
     }
   },
@@ -257,28 +276,138 @@ export default {
     isDayActive () {
       return this.interval === 'day'
     },
-    // https://github.com/chmln/flatpickr/blob/gh-pages/src/flatpickr.l10n.zh.js
-    l10n () {
-      return {
-        firstDayOfWeek: 1,
-        weekdays: {
-          shorthand: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
-          longhand: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
-        },
-        months: {
-          shorthand: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
-          longhand: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
-        }
-      }
-    },
     waveData () {
       return {
         labels: this.labels_2,
         datasets: [{
           label: 'My Radar',
           data: this.data_2,
-          backgroundColor: this.backgroundColor[0]
+          backgroundColor: this.backgroundColor
         }]
+      }
+    },
+    pie () {
+      return {
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b} : {c} ({d}%)'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+          data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+        },
+        series: [{
+          name: 'register',
+          type: 'pie',
+          radius: '60%',
+          center: ['50%', '60%'],
+          data: [
+            {value: 335, name: '直接访问'},
+            {value: 310, name: '邮件营销'},
+            {value: 234, name: '联盟广告'},
+            {value: 135, name: '视频广告'},
+            {value: 154, name: '搜索引擎'}
+          ],
+          itemStyle: {
+            emphasis: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }]
+      }
+    },
+    line () {
+      return {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+            type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+          }
+        },
+        legend: {
+          data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎', '百度', '谷歌', '必应', '其他']
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: [{
+          type: 'category',
+          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+        }],
+        yAxis: [{
+          type: 'value'
+        }],
+        series: [
+          {
+            name: '直接访问',
+            type: 'bar',
+            data: [320, 332, 301, 334, 390, 330, 320]
+          },
+          {
+            name: '邮件营销',
+            type: 'bar',
+            stack: '广告',
+            data: [120, 132, 101, 134, 90, 230, 210]
+          },
+          {
+            name: '联盟广告',
+            type: 'bar',
+            stack: '广告',
+            data: [220, 182, 191, 234, 290, 330, 310]
+          },
+          {
+            name: '视频广告',
+            type: 'bar',
+            stack: '广告',
+            data: [150, 232, 201, 154, 190, 330, 410]
+          },
+          {
+            name: '搜索引擎',
+            type: 'bar',
+            data: [862, 1018, 964, 1026, 1679, 1600, 1570],
+            markLine: {
+              lineStyle: {
+                normal: {
+                  type: 'dashed'
+                }
+              },
+              data: [
+                [{type: 'min'}, {type: 'max'}]
+              ]
+            }
+          },
+          {
+            name: '百度',
+            type: 'bar',
+            barWidth: 5,
+            stack: '搜索引擎',
+            data: [620, 732, 701, 734, 1090, 1130, 1120]
+          },
+          {
+            name: '谷歌',
+            type: 'bar',
+            stack: '搜索引擎',
+            data: [120, 132, 101, 134, 290, 230, 220]
+          },
+          {
+            name: '必应',
+            type: 'bar',
+            stack: '搜索引擎',
+            data: [60, 72, 71, 74, 190, 130, 110]
+          },
+          {
+            name: '其他',
+            type: 'bar',
+            stack: '搜索引擎',
+            data: [62, 82, 91, 84, 109, 110, 120]
+          }
+        ]
       }
     }
   },
@@ -298,7 +427,6 @@ export default {
     }
   }
 }
-
 </script>
 
 <style scoped>
