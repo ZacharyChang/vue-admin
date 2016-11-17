@@ -66,7 +66,6 @@
                 <span class="select">
                   <select>
                     <option>All</option>
-                    <option>SDMC</option>
                   </select>
                 </span>
               </p>
@@ -77,7 +76,6 @@
                 <span class="select">
                   <select>
                     <option>All</option>
-                    <option>DV8429</option>
                   </select>
                 </span>
               </p>
@@ -88,7 +86,6 @@
                 <span class="select">
                   <select>
                     <option>All</option>
-                    <option>6.0.11</option>
                   </select>
                 </span>
               </p>
@@ -221,6 +218,8 @@ import Datepicker from 'vue-bulma-datepicker'
 import Chart from 'vue-bulma-chartjs'
 import VbSwitch from 'vue-bulma-switch'
 import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
+import client from '../../elastic'
+import notify from '../../components/notification'
 
 export default {
 
@@ -256,6 +255,9 @@ export default {
         '#ed6c63',
         '#97cd76'
       ],
+      pieLegendData: [],
+      pieData: [],
+      lineLegendData: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎', '百度', '谷歌', '必应', '其他'],
       lineData: [
         '2009/6/12 2:00', '2009/6/12 3:00', '2009/6/12 4:00', '2009/6/12 5:00', '2009/6/12 6:00', '2009/6/12 7:00', '2009/6/12 8:00', '2009/6/12 9:00', '2009/6/12 10:00', '2009/6/12 11:00', '2009/6/12 12:00', '2009/6/12 13:00', '2009/6/12 14:00', '2009/6/12 15:00', '2009/6/12 16:00', '2009/6/12 17:00', '2009/6/12 18:00', '2009/6/12 19:00', '2009/6/12 20:00', '2009/6/12 21:00', '2009/6/12 22:00', '2009/6/12 23:00',
         '2009/6/13 0:00', '2009/6/13 1:00', '2009/6/13 2:00', '2009/6/13 3:00', '2009/6/13 4:00', '2009/6/13 5:00', '2009/6/13 6:00', '2009/6/13 7:00', '2009/6/13 8:00', '2009/6/13 9:00', '2009/6/13 10:00', '2009/6/13 11:00', '2009/6/13 12:00', '2009/6/13 13:00', '2009/6/13 14:00', '2009/6/13 15:00', '2009/6/13 16:00', '2009/6/13 17:00', '2009/6/13 18:00', '2009/6/13 19:00', '2009/6/13 20:00', '2009/6/13 21:00', '2009/6/13 22:00', '2009/6/13 23:00',
@@ -292,23 +294,18 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b} : {c} ({d}%)'
         },
+        /*
         legend: {
-          orient: 'vertical',
           left: 'left',
-          data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+          data: this.pieLegendData
         },
+        */
         series: [{
           name: 'register',
           type: 'pie',
           radius: '60%',
           center: ['50%', '60%'],
-          data: [
-            {value: 335, name: '直接访问'},
-            {value: 310, name: '邮件营销'},
-            {value: 234, name: '联盟广告'},
-            {value: 135, name: '视频广告'},
-            {value: 154, name: '搜索引擎'}
-          ],
+          data: this.pieData,
           itemStyle: {
             emphasis: {
               shadowBlur: 10,
@@ -328,7 +325,7 @@ export default {
           }
         },
         legend: {
-          data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎', '百度', '谷歌', '必应', '其他']
+          data: this.pieLegendData
         },
         grid: {
           left: '3%',
@@ -338,74 +335,16 @@ export default {
         },
         xAxis: [{
           type: 'category',
-          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+          data: this.pieLegendData
         }],
         yAxis: [{
           type: 'value'
         }],
         series: [
           {
-            name: '直接访问',
-            type: 'bar',
-            data: [320, 332, 301, 334, 390, 330, 320]
-          },
-          {
-            name: '邮件营销',
-            type: 'bar',
-            stack: '广告',
-            data: [120, 132, 101, 134, 90, 230, 210]
-          },
-          {
-            name: '联盟广告',
-            type: 'bar',
-            stack: '广告',
-            data: [220, 182, 191, 234, 290, 330, 310]
-          },
-          {
-            name: '视频广告',
-            type: 'bar',
-            stack: '广告',
-            data: [150, 232, 201, 154, 190, 330, 410]
-          },
-          {
-            name: '搜索引擎',
-            type: 'bar',
-            data: [862, 1018, 964, 1026, 1679, 1600, 1570],
-            markLine: {
-              lineStyle: {
-                normal: {
-                  type: 'dashed'
-                }
-              },
-              data: [
-                [{type: 'min'}, {type: 'max'}]
-              ]
-            }
-          },
-          {
-            name: '百度',
-            type: 'bar',
-            barWidth: 5,
-            stack: '搜索引擎',
-            data: [620, 732, 701, 734, 1090, 1130, 1120]
-          },
-          {
-            name: '谷歌',
-            type: 'bar',
-            stack: '搜索引擎',
-            data: [120, 132, 101, 134, 290, 230, 220]
-          },
-          {
-            name: '必应',
-            type: 'bar',
-            stack: '搜索引擎',
-            data: [60, 72, 71, 74, 190, 130, 110]
-          },
-          {
-            name: '其他',
-            type: 'bar',
-            stack: '搜索引擎',
-            data: [62, 82, 91, 84, 109, 110, 120]
+            name: 'Register',
+            type: 'line',
+            data: this.pieData
           }
         ]
       }
@@ -413,17 +352,55 @@ export default {
   },
 
   watch: {
-    value (newVal, oldVal) {
-      console.log(newVal, oldVal)
-    }
+    interval: 'updateData'
+  },
+
+  mounted: function () {
+    this.updateData()
   },
 
   methods: {
     updateValue (val) {
+      console.log(this.pieData)
       this.isCompare = val
       if (val === true) {
         this.compareDateRange = null
       }
+    },
+    updateData () {
+      var that = this   // 保存Vue对象的指针，否则子函数中无法获取
+      client.search({
+        index: '*',
+        body: {
+          size: 0,
+          aggs: {
+            aggs_date: {
+              date_histogram: {
+                field: 'logtime',
+                interval: this.interval
+              }
+            }
+          }
+        }
+      }).then(function (body) {
+        notify('success', 'Success', 'Successfully got data from server!')
+        var buckets = body.aggregations.aggs_date.buckets
+        console.log(buckets)
+        that.pieLegendData = []
+        that.pieData = []
+        for (var i in buckets) {
+          var obj = {}
+          that.pieLegendData.push(buckets[i].key_as_string)
+          obj['name'] = buckets[i].key_as_string
+          obj['value'] = buckets[i].doc_count
+          that.pieData.push(obj)
+        }
+        console.log(that.pieLegendData)
+        console.log(that.pieData)
+      }, function (error) {
+        notify('danger', 'Fail', 'Can not get data from server!')
+        console.trace(error.message)
+      })
     }
   }
 }
