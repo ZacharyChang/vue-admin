@@ -4,92 +4,98 @@
       <div class="tile is-parent">
         <article class="tile is-child box">
           <h1 class="title">Conditions</h1>
-          <div class="columns">
-            <div class="column is-3">
-              <p class="control">
-                <label class="label">Date:</label>
-                <el-date-picker
-                  v-model="dateRange"
-                  type="daterange"
-                  placeholder="Select Time Range."
-                  style="width:80%">
-                </el-date-picker>
-              </p>
-            </div>
-            <div class="column is-1">
-              <p class="control">
-                <label class="label">Compare</label>
-                <vb-switch type="primary" size="medium" :checked="isCompare" @change="updateValue"></vb-switch>
-              </p>
-            </div>
-            <transition name="slide-fade">
-              <div class="column is-3" v-show="isCompare">
-                <p class="control">
-                  <label class="label">Compare Date:</label>
-                  <el-date-picker
-                    v-model="compareDateRange"
-                    type="daterange"
-                    placeholder="Select Compare Time Range."
-                    style="width:80%">
-                  </el-date-picker>
-                </p>
+          <div class="block is-flex">
+            <collapse>
+              <div class="columns">
+                <div class="column is-3">
+                  <p class="control">
+                    <label class="label">Date:</label>
+                    <el-date-picker
+                      v-model="dateRange"
+                      type="daterange"
+                      placeholder="Select Time Range..."
+                      style="width:80%">
+                    </el-date-picker>
+                  </p>
+                </div>
+                <div class="column is-1">
+                  <p class="control">
+                    <label class="label">Compare</label>
+                    <vb-switch type="primary" size="medium" :checked="isCompare" @change="updateValue"></vb-switch>
+                  </p>
+                </div>
+                <transition name="slide-fade">
+                  <div class="column is-3" v-show="isCompare">
+                    <p class="control">
+                      <label class="label">Compare Date:</label>
+                      <el-date-picker
+                        v-model="compareDateRange"
+                        type="daterange"
+                        placeholder="Select Compare Time Range..."
+                        style="width:80%">
+                      </el-date-picker>
+                    </p>
+                  </div>
+                </transition>
               </div>
-            </transition>
-          </div>
-          <div class="columns">
-            <div class="column">
-              <p class="control">
-                <label class="label">Interval:</label>
-                <a class="button" :class="{ 'is-primary': isMonthActive }" @click="interval='month'">
-                  <span class="icon is-small">
-                    <i class="fa fa-align-left"></i>
-                  </span>
-                  <span>Month</span>
-                </a>
-                <a class="button" :class="{ 'is-primary': isWeekActive }" @click="interval='week'">
-                  <span class="icon is-small">
-                    <i class="fa fa-align-center"></i>
-                  </span>
-                  <span>Week</span>
-                </a>
-                <a class="button" :class="{ 'is-primary': isDayActive }" @click="interval='day'">
-                  <span class="icon is-small">
-                    <i class="fa fa-align-right"></i>
-                  </span>
-                  <span>Day</span>
-                </a>
-              </p>
-            </div>
-            <div class="column">
-              <p class="control">
-                <label class="label">Manufacturer:</label>
-                <span class="select">
-                  <select>
-                    <option>All</option>
-                  </select>
-                </span>
-              </p>
-            </div>
-            <div class="column">
-              <p class="control">
-                <label class="label">Model:</label>
-                <span class="select">
-                  <select>
-                    <option>All</option>
-                  </select>
-                </span>
-              </p>
-            </div>
-            <div class="column">
-              <p class="control">
-                <label class="label">Version:</label>
-                <span class="select">
-                  <select>
-                    <option>All</option>
-                  </select>
-                </span>
-              </p>
-            </div>
+              <collapse-item title="More..">
+                <div class="columns">
+                  <div class="column">
+                    <p class="control">
+                      <label class="label">Interval:</label>
+                      <a class="button" :class="{ 'is-primary': isMonthActive }" @click="interval='month'">
+                        <span class="icon is-small">
+                          <i class="fa fa-align-left"></i>
+                        </span>
+                        <span>Month</span>
+                      </a>
+                      <a class="button" :class="{ 'is-primary': isWeekActive }" @click="interval='week'">
+                        <span class="icon is-small">
+                          <i class="fa fa-align-center"></i>
+                        </span>
+                        <span>Week</span>
+                      </a>
+                      <a class="button" :class="{ 'is-primary': isDayActive }" @click="interval='day'">
+                        <span class="icon is-small">
+                          <i class="fa fa-align-right"></i>
+                        </span>
+                        <span>Day</span>
+                      </a>
+                    </p>
+                  </div>
+                  <div class="column">
+                    <p class="control">
+                      <label class="label">Manufacturer:</label>
+                      <span class="select">
+                        <select>
+                          <option>All</option>
+                        </select>
+                      </span>
+                    </p>
+                  </div>
+                  <div class="column">
+                    <p class="control">
+                      <label class="label">Model:</label>
+                      <span class="select">
+                        <select>
+                          <option>All</option>
+                        </select>
+                      </span>
+                    </p>
+                  </div>
+                  <div class="column">
+                    <p class="control">
+                      <label class="label">Version:</label>
+                      <span class="select">
+                        <select>
+                          <option>All</option>
+                        </select>
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </collapse-item>
+            </collapse>
           </div>
         </article>
       </div>
@@ -100,19 +106,47 @@
           <nav class="level">
             <div class="level-item has-text-centered">
               <p class="heading">Total</p>
-              <p class="title">3,456</p>
+              <p v-if="isCompare" class="title">
+                {{sum}}
+                <i v-if="compareSum > sum" aria-hidden="true" class="greater fa fa-long-arrow-up"></i>
+                <i v-if="compareSum < sum" aria-hidden="true" class="lesser fa fa-long-arrow-down"></i>
+                <i v-if="compareSum == sum" aria-hidden="true" class="equal fa fa-exchange"></i>
+                {{compareSum}}
+              </p>
+              <p v-else class="title">{{sum}}</p>
             </div>
             <div class="level-item has-text-centered">
               <p class="heading">Maximum</p>
-              <p class="title">123</p>
+              <p v-if="isCompare" class="title">
+                {{max}}
+                <i v-if="compareMax > max" aria-hidden="true" class="greater fa fa-long-arrow-up"></i>
+                <i v-if="compareMax < max" aria-hidden="true" class="lesser fa fa-long-arrow-down"></i>
+                <i v-if="compareMax == max" aria-hidden="true" class="equal fa fa-exchange"></i>
+                {{compareMax}}
+              </p>
+              <p v-else class="title">{{max}}</p>
             </div>
             <div class="level-item has-text-centered">
               <p class="heading">Minimum</p>
-              <p class="title">456K</p>
+              <p v-if="isCompare" class="title">
+                {{min}}
+                <i v-if="compareMin > min" aria-hidden="true" class="greater fa fa-long-arrow-up"></i>
+                <i v-if="compareMin < min" aria-hidden="true" class="lesser fa fa-long-arrow-down"></i>
+                <i v-if="compareMin == min" aria-hidden="true" class="equal fa fa-exchange"></i>
+                {{compareMin}}
+              </p>
+              <p v-else class="title">{{min}}</p>
             </div>
             <div class="level-item has-text-centered">
               <p class="heading">Average</p>
-              <p class="title">789</p>
+              <p v-if="isCompare" class="title">
+                {{avg}}
+                <i v-if="compareAvg > avg" aria-hidden="true" class="greater fa fa-long-arrow-up"></i>
+                <i v-if="compareAvg < avg" aria-hidden="true" class="lesser fa fa-long-arrow-down"></i>
+                <i v-if="compareAvg == avg" aria-hidden="true" class="equal fa fa-exchange"></i>
+                {{compareAvg}}
+              </p>
+              <p v-else class="title">{{avg}}</p>
             </div>
           </nav>
         </article>
@@ -122,14 +156,12 @@
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
           <h4 class="title">User Register Percent</h4>
-          <!--<chart :type="'pie'" :data="waveData" :options="options"></chart>-->
           <echart :options="pie"></echart>
         </article>
       </div>
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
           <h4 class="title">User Register Count</h4>
-          <!--<chart :type="'line'" :data="waveData" :options="options"></chart>-->
           <echart :options="line"></echart>
         </article>
       </div>
@@ -139,71 +171,17 @@
       <div class="tile is-parent">
         <article class="tile is-child box">
           <h4 class="title">Table</h4>
-          <table class="table is-boardered">
+          <table class="table is-bordered">
             <thead>
             <tr>
-              <th>Name</th>
-              <th>Instrument</th>
-              <th></th>
-              <th></th>
+              <th>Date</th>
+              <th>Count</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-              <td>Misty Abbott</td>
-              <td>Bass Guitar</td>
-              <td class="is-icon">
-                <a href="#">
-                  <i class="fa fa-twitter"></i>
-                </a>
-              </td>
-              <td class="is-icon">
-                <a href="#">
-                  <i class="fa fa-instagram"></i>
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td>John Smith</td>
-              <td>Rhythm Guitar</td>
-              <td class="is-icon">
-                <a href="#">
-                  <i class="fa fa-twitter"></i>
-                </a>
-              </td>
-              <td class="is-icon">
-                <a href="#">
-                  <i class="fa fa-instagram"></i>
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td>Robert Mikels</td>
-              <td>Lead Guitar</td>
-              <td class="is-icon">
-                <a href="#">
-                  <i class="fa fa-twitter"></i>
-                </a>
-              </td>
-              <td class="is-icon">
-                <a href="#">
-                  <i class="fa fa-instagram"></i>
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td>Karyn Holmberg</td>
-              <td>Drums</td>
-              <td class="is-icon">
-                <a href="#">
-                  <i class="fa fa-twitter"></i>
-                </a>
-              </td>
-              <td class="is-icon">
-                <a href="#">
-                  <i class="fa fa-instagram"></i>
-                </a>
-              </td>
+            <tr v-for="(item, index) in data">
+              <td>{{item.name}}</td>
+              <td>{{item.value}}</td>
             </tr>
             </tbody>
           </table>
@@ -214,57 +192,37 @@
 </template>
 
 <script>
-import Datepicker from 'vue-bulma-datepicker'
-import Chart from 'vue-bulma-chartjs'
 import VbSwitch from 'vue-bulma-switch'
 import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
 import client from '../../elastic'
 import notify from '../../components/notification'
+import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
 
 export default {
 
   components: {
-    Datepicker,
-    Chart,
     VbSwitch,
-    echart: ECharts
+    echart: ECharts,
+    Collapse,
+    CollapseItem
   },
 
   data () {
-    let data = []
-
-    for (let i = 0; i <= 360; i++) {
-      let t = i / 180 * Math.PI
-      let r = Math.sin(2 * t) * Math.cos(2 * t)
-      data.push([r, i])
-    }
     return {
       isCompare: false,
       dateRange: null,
       compareDateRange: null,
-      interval: 'week',
-      options: {
-        segmentShowStroke: false
+      interval: 'day',
+      pickerOptions: {
+        disabledDate (time) {
+          return time.getTime() > Date.now()
+        }
       },
-      labels_2: ['April', 'May', 'June', 'Jule', 'August', 'September', 'October', 'November', 'December'],
-      data_2: [1, 9, 3, 4, 5, 6, 7, 8, 2].map(e => Math.sin(e) * 25 + 25),
-      backgroundColor: [
-        '#1fc8db',
-        '#fce473',
-        '#42afe3',
-        '#ed6c63',
-        '#97cd76'
-      ],
-      pieLegendData: [],
-      pieData: [],
-      lineLegendData: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎', '百度', '谷歌', '必应', '其他'],
-      lineData: [
-        '2009/6/12 2:00', '2009/6/12 3:00', '2009/6/12 4:00', '2009/6/12 5:00', '2009/6/12 6:00', '2009/6/12 7:00', '2009/6/12 8:00', '2009/6/12 9:00', '2009/6/12 10:00', '2009/6/12 11:00', '2009/6/12 12:00', '2009/6/12 13:00', '2009/6/12 14:00', '2009/6/12 15:00', '2009/6/12 16:00', '2009/6/12 17:00', '2009/6/12 18:00', '2009/6/12 19:00', '2009/6/12 20:00', '2009/6/12 21:00', '2009/6/12 22:00', '2009/6/12 23:00',
-        '2009/6/13 0:00', '2009/6/13 1:00', '2009/6/13 2:00', '2009/6/13 3:00', '2009/6/13 4:00', '2009/6/13 5:00', '2009/6/13 6:00', '2009/6/13 7:00', '2009/6/13 8:00', '2009/6/13 9:00', '2009/6/13 10:00', '2009/6/13 11:00', '2009/6/13 12:00', '2009/6/13 13:00', '2009/6/13 14:00', '2009/6/13 15:00', '2009/6/13 16:00', '2009/6/13 17:00', '2009/6/13 18:00', '2009/6/13 19:00', '2009/6/13 20:00', '2009/6/13 21:00', '2009/6/13 22:00', '2009/6/13 23:00',
-        '2009/6/14 0:00', '2009/7/16 6:00', '2009/7/16 7:00', '2009/7/16 8:00', '2009/7/16 9:00', '2009/7/16 10:00', '2009/7/16 11:00', '2009/7/16 12:00', '2009/7/16 13:00', '2009/7/16 14:00', '2009/7/16 15:00', '2009/7/16 16:00', '2009/7/16 17:00', '2009/7/16 18:00', '2009/7/16 19:00', '2009/7/16 20:00', '2009/7/16 21:00', '2009/7/16 22:00', '2009/7/16 23:00',
-        '2009/7/17 0:00', '2009/7/17 1:00', '2009/7/17 2:00', '2009/7/17 3:00', '2009/7/17 4:00', '2009/7/17 5:00', '2009/7/17 6:00', '2009/7/17 7:00', '2009/7/17 8:00', '2009/7/17 9:00', '2009/7/17 10:00', '2009/7/17 11:00', '2009/7/17 12:00', '2009/7/17 13:00', '2009/7/17 14:00', '2009/7/17 15:00', '2009/7/17 16:00', '2009/7/17 17:00', '2009/7/17 18:00', '2009/7/17 19:00', '2009/7/17 20:00', '2009/7/17 21:00', '2009/7/17 22:00', '2009/7/17 23:00',
-        '2009/7/18 0:00', '2009/10/1 6:00', '2009/10/1 7:00', '2009/10/1 8:00', '2009/10/1 9:00', '2009/10/1 10:00', '2009/10/1 11:00', '2009/10/1 12:00', '2009/10/1 13:00', '2009/10/1 14:00', '2009/10/1 15:00', '2009/10/1 16:00', '2009/10/1 17:00', '2009/10/1 18:00', '2009/10/1 19:00', '2009/10/1 20:00', '2009/10/1 21:00', '2009/10/1 22:00', '2009/10/1 23:00', '2009/10/2 0:00', '2009/10/2 1:00', '2009/10/2 2:00', '2009/10/2 3:00', '2009/10/2 4:00'
-      ]
+      pieLimit: 20,
+      legendData: [],
+      data: [],
+      dataArray: [],
+      compareDataArray: []
     }
   },
 
@@ -278,15 +236,87 @@ export default {
     isDayActive () {
       return this.interval === 'day'
     },
-    waveData () {
-      return {
-        labels: this.labels_2,
-        datasets: [{
-          label: 'My Radar',
-          data: this.data_2,
-          backgroundColor: this.backgroundColor
-        }]
+    timezone () {
+      var offset = new Date().getTimezoneOffset() / 60
+      var abs = Math.abs(offset)
+      var str = '0' + abs + ':00'
+      // the timezone is opposite to the offset
+      if (offset > 0) {
+        return '-' + str.slice(-5)
       }
+      return '+' + str.slice(-5)
+    },
+    dateStart () {
+      if (this.dateRange) {
+        return this.dateRange[0]
+      }
+    },
+    dateEnd () {
+      if (this.dateRange) {
+        var end = new Date(this.dateRange[1])
+        end.setDate(end.getDate() + 1)
+        return end
+      }
+    },
+    compareDateStart () {
+      if (this.compareDateRange) {
+        return this.compareDateRange[0]
+      }
+    },
+    compareDateEnd () {
+      if (this.compareDateRange) {
+        var end = new Date(this.compareDateRange[1])
+        end.setDate(end.getDate() + 1)
+        return end
+      }
+    },
+    sum () {
+      if (this.dataArray.length > 0) {
+        return this.dataArray.reduce((a, b) => a + b, 0)
+      }
+      return 0
+    },
+    max () {
+      if (this.dataArray.length > 0) {
+        return Math.max.apply(null, this.dataArray)
+      }
+      return 0
+    },
+    min () {
+      if (this.dataArray.length > 0) {
+        return Math.min.apply(null, this.dataArray)
+      }
+      return 0
+    },
+    avg () {
+      if (this.dataArray.length > 0) {
+        return parseInt(this.sum / (this.dataArray.length))
+      }
+      return 0
+    },
+    compareSum () {
+      if (this.compareDataArray.length > 0) {
+        return this.compareDataArray.reduce((a, b) => a + b, 0)
+      }
+      return 0
+    },
+    compareMax () {
+      if (this.compareDataArray.length > 0) {
+        return Math.max.apply(null, this.compareDataArray)
+      }
+      return 0
+    },
+    compareMin () {
+      if (this.compareDataArray.length > 0) {
+        return Math.min.apply(null, this.compareDataArray)
+      }
+      return 0
+    },
+    compareAvg () {
+      if (this.compareDataArray.length > 0) {
+        return parseInt(this.compareSum / (this.compareDataArray.length))
+      }
+      return 0
     },
     pie () {
       return {
@@ -294,18 +324,12 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b} : {c} ({d}%)'
         },
-        /*
-        legend: {
-          left: 'left',
-          data: this.pieLegendData
-        },
-        */
         series: [{
           name: 'register',
           type: 'pie',
           radius: '60%',
           center: ['50%', '60%'],
-          data: this.pieData,
+          data: this.data.slice(0, this.pieLimit),
           itemStyle: {
             emphasis: {
               shadowBlur: 10,
@@ -324,9 +348,6 @@ export default {
             type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
           }
         },
-        legend: {
-          data: this.pieLegendData
-        },
         grid: {
           left: '3%',
           right: '4%',
@@ -335,7 +356,7 @@ export default {
         },
         xAxis: [{
           type: 'category',
-          data: this.pieLegendData
+          data: this.legendData
         }],
         yAxis: [{
           type: 'value'
@@ -344,7 +365,7 @@ export default {
           {
             name: 'Register',
             type: 'line',
-            data: this.pieData
+            data: this.data
           }
         ]
       }
@@ -352,7 +373,17 @@ export default {
   },
 
   watch: {
-    interval: 'updateData'
+    interval: 'updateData',
+    dateRange: function (newVal, oldVal) {
+      console.log(newVal)
+      this.updateData()
+    },
+    compareDateRange: function (newVal, oldVal) {
+      console.log(this.compareDateRange)
+      if (this.compareDateRange && this.compareDateRange[0]) {
+        this.updateCompareData()
+      }
+    }
   },
 
   mounted: function () {
@@ -361,7 +392,7 @@ export default {
 
   methods: {
     updateValue (val) {
-      console.log(this.pieData)
+      console.log(this.data)
       this.isCompare = val
       if (val === true) {
         this.compareDateRange = null
@@ -370,14 +401,71 @@ export default {
     updateData () {
       var that = this   // 保存Vue对象的指针，否则子函数中无法获取
       client.search({
-        index: '*',
+        index: 'tms-*',
         body: {
           size: 0,
+          'query': {
+            'range': {
+              'logtime': {
+                'gte': this.dateStart,
+                'lt': this.dateEnd
+              }
+            }
+          },
           aggs: {
             aggs_date: {
               date_histogram: {
                 field: 'logtime',
-                interval: this.interval
+                interval: this.interval,
+                time_zone: this.timezone
+                // offset: new Date().getTimezoneOffset()
+              }
+            }
+          }
+        }
+      }).then(function (body) {
+        notify('success', 'Success', 'Successfully received data from server!')
+        var buckets = body.aggregations.aggs_date.buckets
+        if (buckets.length === 0) {
+          notify('warning', 'Warning', 'Received no data under the conditions you choose!')
+        }
+        console.log(buckets)
+        that.legendData = []
+        that.data = []
+        that.dataArray = []
+        for (var i in buckets) {
+          var obj = {}
+          that.legendData.push(buckets[i].key_as_string.slice(0, 10))
+          that.dataArray.push(buckets[i].doc_count)
+          obj['name'] = buckets[i].key_as_string.slice(0, 10)
+          obj['value'] = buckets[i].doc_count
+          that.data.push(obj)
+        }
+      }, function (error) {
+        notify('danger', 'Fail', 'Can not receive data from server!')
+        console.trace(error.message)
+      })
+    },
+    updateCompareData () {
+      var that = this   // 保存Vue对象的指针，否则子函数中无法获取
+      client.search({
+        index: 'tms-*',
+        body: {
+          size: 0,
+          'query': {
+            'range': {
+              'logtime': {
+                'gte': this.compareDateStart,
+                'lt': this.compareDateEnd
+              }
+            }
+          },
+          aggs: {
+            aggs_date: {
+              date_histogram: {
+                field: 'logtime',
+                interval: this.interval,
+                time_zone: this.timezone
               }
             }
           }
@@ -385,18 +473,14 @@ export default {
       }).then(function (body) {
         notify('success', 'Success', 'Successfully got data from server!')
         var buckets = body.aggregations.aggs_date.buckets
-        console.log(buckets)
-        that.pieLegendData = []
-        that.pieData = []
-        for (var i in buckets) {
-          var obj = {}
-          that.pieLegendData.push(buckets[i].key_as_string)
-          obj['name'] = buckets[i].key_as_string
-          obj['value'] = buckets[i].doc_count
-          that.pieData.push(obj)
+        if (buckets.length === 0) {
+          notify('warning', 'Warning', 'Received no data under the conditions you choose!')
         }
-        console.log(that.pieLegendData)
-        console.log(that.pieData)
+        console.log(buckets)
+        that.compareDataArray = []
+        for (var i in buckets) {
+          that.compareDataArray.push(buckets[i].doc_count)
+        }
       }, function (error) {
         notify('danger', 'Fail', 'Can not get data from server!')
         console.trace(error.message)
@@ -421,5 +505,16 @@ export default {
   padding-left: 10px;
   opacity: 0;
 }
-
+.collapse-item {
+  width: 100%
+}
+.greater {
+  color: #23d160
+}
+.lesser {
+  color: #ff3860
+}
+.equal {
+  color: #3273dc
+}
 </style>
