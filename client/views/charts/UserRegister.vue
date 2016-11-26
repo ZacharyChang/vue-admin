@@ -165,7 +165,6 @@
           <echart :options="line"></echart>
         </article>
       </div>
-      <div id="main" style="width: 600px;height:400px;"></div>
     </div>
     <div class="tile is-ancestor">
       <div class="tile is-parent">
@@ -435,10 +434,12 @@ export default {
         that.dataArray = []
         for (var i in buckets) {
           var obj = {}
-          that.legendData.push(buckets[i].key_as_string.slice(0, 10))
-          that.dataArray.push(buckets[i].doc_count)
-          obj['name'] = buckets[i].key_as_string.slice(0, 10)
-          obj['value'] = buckets[i].doc_count
+          var date = new Date(buckets[i].key).toLocaleDateString()
+          var value = buckets[i].doc_count
+          that.legendData.push(date)
+          that.dataArray.push(value)
+          obj['value'] = value
+          obj['name'] = date
           that.data.push(obj)
         }
       }, function (error) {
