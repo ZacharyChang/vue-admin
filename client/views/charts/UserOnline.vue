@@ -18,29 +18,10 @@
                     </el-date-picker>
                   </p>
                 </div>
-                <div class="column is-1">
-                  <p class="control">
-                    <label class="label">Compare</label>
-                    <vb-switch type="primary" size="medium" :checked="isCompare" @change="updateValue"></vb-switch>
-                  </p>
-                </div>
-                <transition name="slide-fade">
-                  <div class="column is-3" v-show="isCompare">
-                    <p class="control">
-                      <label class="label">Compare Date:</label>
-                      <el-date-picker
-                        v-model="compareRange"
-                        type="datetimerange"
-                        placeholder="Select Compare Time Range..."
-                        style="width:80%">
-                      </el-date-picker>
-                    </p>
-                  </div>
-                </transition>
               </div>
-              <collapse-item title="More..">
+              <collapse-item title="More.." selected>
                 <div class="columns">
-                  <div class="column">
+                  <div class="column is-6">
                     <p class="control">
                       <label class="label">Interval:</label>
                       <a class="button" :class="{ 'is-primary': this.interval === 'month' }" @click="interval='month'">
@@ -79,8 +60,11 @@
                     <p class="control">
                       <label class="label">Manufacturer:</label>
                       <span class="select">
-                        <select>
-                          <option>All</option>
+                        <select v-model="manufacturer">
+                          <option value="_all">All</option>
+                          <option v-for="(item, index) in manufacturerList">
+                            {{item}}
+                          </option>
                         </select>
                       </span>
                     </p>
@@ -89,8 +73,9 @@
                     <p class="control">
                       <label class="label">Model:</label>
                       <span class="select">
-                        <select>
-                          <option>All</option>
+                        <select v-model="model">
+                          <option value="_all">All</option>
+                          <option v-for="(item, index) in modelList">{{item}}</option>
                         </select>
                       </span>
                     </p>
@@ -201,9 +186,7 @@ export default {
 
   data () {
     return {
-      isCompare: false,
       dateRange: null,
-      compareDateRange: null,
       interval: 'hour',
       pickerOptions: {
         disabledDate (time) {
@@ -212,7 +195,11 @@ export default {
       },
       pieLimit: 20,
       data: [],
-      compareDataArray: []
+      compareData: [],
+      manufacturerList: ['_all'],
+      modelList: ['_all'],
+      manufacturer: '_all',
+      model: '_all'
     }
   },
 
@@ -254,18 +241,6 @@ export default {
         return end
       }
     },
-    compareDateStart () {
-      if (this.compareDateRange) {
-        return this.compareDateRange[0]
-      }
-    },
-    compareDateEnd () {
-      if (this.compareDateRange) {
-        var end = new Date(this.compareDateRange[1])
-        end.setDate(end.getDate() + 1)
-        return end
-      }
-    },
     sum () {
       if (this.onlineData.length > 0) {
         return this.onlineData.reduce((a, b) => a + b, 0)
@@ -287,30 +262,6 @@ export default {
     avg () {
       if (this.onlineData.length > 0) {
         return parseInt(this.sum / (this.onlineData.length))
-      }
-      return 0
-    },
-    compareSum () {
-      if (this.compareDataArray.length > 0) {
-        return this.compareDataArray.reduce((a, b) => a + b, 0)
-      }
-      return 0
-    },
-    compareMax () {
-      if (this.compareDataArray.length > 0) {
-        return Math.max.apply(null, this.compareDataArray)
-      }
-      return 0
-    },
-    compareMin () {
-      if (this.compareDataArray.length > 0) {
-        return Math.min.apply(null, this.compareDataArray)
-      }
-      return 0
-    },
-    compareAvg () {
-      if (this.compareDataArray.length > 0) {
-        return parseInt(this.compareSum / (this.compareDataArray.length))
       }
       return 0
     },
@@ -347,7 +298,7 @@ export default {
             itemStyle: {
               normal: {
                 lineStyle: {
-                  color: '#1fc8db'
+                  color: '#ff3860'
                 }
               }
             }
@@ -360,7 +311,7 @@ export default {
             itemStyle: {
               normal: {
                 lineStyle: {
-                  color: '#ff3860'
+                  color: '#1fc8db'
                 }
               }
             }
@@ -372,9 +323,9 @@ export default {
 
   watch: {
     interval: 'updateData',
-    dateRange: function (newVal, oldVal) {
-      this.updateData()
-    },
+    dateRange: 'updateData',
+    manufacturer: 'updateData',
+    model: 'updateData',
     compareDateRange: function (newVal, oldVal) {
       if (this.compareDateRange && this.compareDateRange[0]) {
         this.updateCompareData()
@@ -383,6 +334,7 @@ export default {
   },
 
   mounted: function () {
+    this.getList()
     this.updateData()
   },
 
@@ -395,6 +347,7 @@ export default {
     },
     updateData () {
       var that = this   // 保存Vue对象的指针，否则子函数中无法获取
+      notify('info', 'Searching', 'Please wait for a few seconds...')
       client.search({
         index: 'tms-online-*',
         body: {
@@ -412,12 +365,12 @@ export default {
                 },
                 {
                   'term': {
-                    'manufacturer': '_all'
+                    'manufacturer.keyword': this.manufacturer
                   }
                 },
                 {
                   'term': {
-                    'model': '_all'
+                    'model.keyword': this.model
                   }
                 }
               ]
@@ -479,42 +432,56 @@ export default {
       link.click()
       document.body.removeChild(link)
     },
-    updateCompareData () {
+    getList () {
       var that = this   // 保存Vue对象的指针，否则子函数中无法获取
       client.search({
         index: 'tms-online-*',
         body: {
           size: 0,
-          'query': {
-            'range': {
-              '@timestamp': {
-                'gte': this.compareDateStart,
-                'lt': this.compareDateEnd
-              }
+          query: {
+            bool: {
+              must_not: [
+                {
+                  term: {
+                    'manufacturer.keyword': '_all'
+                  }
+                },
+                {
+                  term: {
+                    'model.keyword': '_all'
+                  }
+                }
+              ]
             }
           },
           aggs: {
-            aggs_date: {
-              date_histogram: {
-                field: '@timestamp',
-                interval: this.interval,
-                time_zone: this.timezone
+            aggs_model: {
+              terms: {
+                field: 'model.keyword',
+                order: {
+                  _term: 'asc'
+                }
+              }
+            },
+            aggs_manufacturer: {
+              terms: {
+                field: 'manufacturer.keyword',
+                order: {
+                  _term: 'asc'
+                }
               }
             }
           }
         }
       }).then(function (body) {
-        notify('success', 'Success', 'Successfully got data from server!')
-        var buckets = body.aggregations.aggs_date.buckets
-        if (buckets.length === 0) {
-          notify('warning', 'Warning', 'Received no data under the conditions you choose!')
-        }
-        that.compareDataArray = []
-        for (var i in buckets) {
-          that.compareDataArray.push(buckets[i].doc_count)
-        }
+        that.manufacturerList = body.aggregations.aggs_manufacturer.buckets.map(function (item) {
+          return item.key
+        })
+        that.modelList = body.aggregations.aggs_model.buckets.map(function (item) {
+          return item.key
+        })
       }, function (error) {
-        notify('danger', 'Fail', 'Can not get data from server!')
+        notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
       })
     }
