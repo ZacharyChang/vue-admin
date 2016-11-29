@@ -36,26 +36,6 @@ export default {
       name: 'Plotly',
       path: 'plotly',
       component: lazyLoading('charts/Plotly')
-    },
-    {
-      name: 'User Number',
-      path: 'userNumber',
-      component: lazyLoading('charts/UserNumber')
-    },
-    {
-      name: 'User Register',
-      path: 'userRegister',
-      component: lazyLoading('charts/UserRegister')
-    },
-    {
-      name: 'User Login',
-      path: 'userLogin',
-      component: lazyLoading('charts/UserLogin')
-    },
-    {
-      name: 'User Online',
-      path: 'userOnline',
-      component: lazyLoading('charts/UserOnline')
     }
   ]
 }
