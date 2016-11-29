@@ -46,6 +46,16 @@ export default {
       name: 'User Register',
       path: 'userRegister',
       component: lazyLoading('charts/UserRegister')
+    },
+    {
+      name: 'User Login',
+      path: 'userLogin',
+      component: lazyLoading('charts/UserLogin')
+    },
+    {
+      name: 'User Online',
+      path: 'userOnline',
+      component: lazyLoading('charts/UserOnline')
     }
   ]
 }
