@@ -43,31 +43,31 @@
                   <div class="column">
                     <p class="control">
                       <label class="label">Interval:</label>
-                      <a class="button" :class="{ 'is-primary': isMonthActive }" @click="interval='month'">
+                      <a class="button" :class="{ 'is-primary': this.interval === 'month' }" @click="interval='month'">
                         <span class="icon is-small">
                           <i class="fa fa-align-left"></i>
                         </span>
                         <span>Month</span>
                       </a>
-                      <a class="button" :class="{ 'is-primary': isWeekActive }" @click="interval='week'">
+                      <a class="button" :class="{ 'is-primary': this.interval === 'week' }" @click="interval='week'">
                         <span class="icon is-small">
                           <i class="fa fa-align-center"></i>
                         </span>
                         <span>Week</span>
                       </a>
-                      <a class="button" :class="{ 'is-primary': isDayActive }" @click="interval='day'">
+                      <a class="button" :class="{ 'is-primary': this.interval === 'day' }" @click="interval='day'">
                         <span class="icon is-small">
                           <i class="fa fa-align-right"></i>
                         </span>
                         <span>Day</span>
                       </a>
-                      <a class="button" :class="{ 'is-primary': isHourActive }" @click="interval='hour'">
+                      <a class="button" :class="{ 'is-primary': this.interval === 'hour' }" @click="interval='hour'">
                         <span class="icon is-small">
                           <i class="fa fa-align-right"></i>
                         </span>
                         <span>Hour</span>
                       </a>
-                      <a class="button" :class="{ 'is-primary': isMinuteActive }" @click="interval='minute'">
+                      <a class="button" :class="{ 'is-primary': this.interval === 'minute' }" @click="interval='minute'">
                         <span class="icon is-small">
                           <i class="fa fa-align-right"></i>
                         </span>
@@ -154,18 +154,26 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent">
         <article class="tile is-child box">
-          <h4 class="title">Table</h4>
+          <h4 class="title">Table
+            <a class="button is-primary is-outlined" style="float:right" @click="getExcel">
+              <span class="icon is-small">
+                <i class="fa fa-file-excel-o"></i>
+              </span>
+            <span>Export Excel</span>
+          </a></h4>
           <table class="table is-bordered">
             <thead>
             <tr>
               <th>Date</th>
-              <th>Count</th>
+              <th>Online</th>
+              <th>Offline</th>
             </tr>
             </thead>
             <tbody>
             <tr v-for="(item, index) in data">
               <td>{{item.name}}</td>
-              <td>{{item.value}}</td>
+              <td>{{item.online}}</td>
+              <td>{{item.offline}}</td>
             </tr>
             </tbody>
           </table>
@@ -203,29 +211,26 @@ export default {
         }
       },
       pieLimit: 20,
-      legendData: [],
       data: [],
-      onlineData: [],
-      offlineData: [],
       compareDataArray: []
     }
   },
 
   computed: {
-    isMonthActive () {
-      return this.interval === 'month'
+    legendData () {
+      return this.data.map(function (item) {
+        return item.name
+      })
     },
-    isWeekActive () {
-      return this.interval === 'week'
+    onlineData () {
+      return this.data.map(function (item) {
+        return item.online
+      })
     },
-    isDayActive () {
-      return this.interval === 'day'
-    },
-    isHourActive () {
-      return this.interval === 'hour'
-    },
-    isMinuteActive () {
-      return this.interval === 'minute'
+    offlineData () {
+      return this.data.map(function (item) {
+        return item.offline
+      })
     },
     timezone () {
       var offset = new Date().getTimezoneOffset() / 60
@@ -368,11 +373,9 @@ export default {
   watch: {
     interval: 'updateData',
     dateRange: function (newVal, oldVal) {
-      console.log(newVal)
       this.updateData()
     },
     compareDateRange: function (newVal, oldVal) {
-      console.log(this.compareDateRange)
       if (this.compareDateRange && this.compareDateRange[0]) {
         this.updateCompareData()
       }
@@ -385,7 +388,6 @@ export default {
 
   methods: {
     updateValue (val) {
-      console.log(this.data)
       this.isCompare = val
       if (val === true) {
         this.compareDateRange = null
@@ -394,7 +396,7 @@ export default {
     updateData () {
       var that = this   // 保存Vue对象的指针，否则子函数中无法获取
       client.search({
-        index: '*',
+        index: 'tms-online-*',
         body: {
           size: 0,
           'query': {
@@ -427,7 +429,6 @@ export default {
                 field: '@timestamp',
                 interval: this.interval,
                 time_zone: this.timezone
-                // offset: new Date().getTimezoneOffset()
               },
               aggs: {
                 aggs_online: {
@@ -450,25 +451,33 @@ export default {
         if (buckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
         }
-        console.log(buckets)
-        that.legendData = []
         that.data = []
-        that.onlineData = []
-        that.offlineData = []
         for (var i in buckets) {
           var obj = {}
           var date = new Date(buckets[i].key).toLocaleString()
-          that.legendData.push(date)
-          that.onlineData.push(parseInt(buckets[i].aggs_online.value))
-          that.offlineData.push(parseInt(buckets[i].aggs_offline.value))
-          obj['value'] = parseInt(buckets[i].aggs_online.value)
           obj['name'] = date
+          obj['online'] = parseInt(buckets[i].aggs_online.value)
+          obj['offline'] = parseInt(buckets[i].aggs_offline.value)
           that.data.push(obj)
         }
       }, function (error) {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
       })
+    },
+    getExcel () {
+      var data = this.data
+      var csvContent = 'data:text/csv;charset=utf-8,'
+      data.forEach(function (value, index) {
+        csvContent += value.name + ',' + value.online + ',' + value.offline + '\r\n'
+      })
+      var encodedUri = encodeURI(csvContent)
+      var link = document.createElement('a')
+      link.setAttribute('href', encodedUri)
+      link.setAttribute('download', 'tms_online.csv')
+      document.body.appendChild(link)  // Required for FF
+      link.click()
+      document.body.removeChild(link)
     },
     updateCompareData () {
       var that = this   // 保存Vue对象的指针，否则子函数中无法获取
@@ -500,7 +509,6 @@ export default {
         if (buckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
         }
-        console.log(buckets)
         that.compareDataArray = []
         for (var i in buckets) {
           that.compareDataArray.push(buckets[i].doc_count)
