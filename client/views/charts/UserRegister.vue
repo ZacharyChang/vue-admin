@@ -38,7 +38,7 @@
                   </div>
                 </transition>
               </div>
-              <collapse-item title="More..">
+              <collapse-item title="More.." selected>
                 <div class="columns">
                   <div class="column">
                     <p class="control">
@@ -399,6 +399,7 @@ export default {
     },
     updateData () {
       var that = this   // 保存Vue对象的指针，否则子函数中无法获取
+      notify('info', 'Searching', 'Please wait for a few seconds...')
       client.search({
         index: 'tms-*',
         body: {
