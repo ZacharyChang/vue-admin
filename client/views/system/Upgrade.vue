@@ -187,6 +187,7 @@ import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
 import client from '../../elastic'
 import notify from '../../components/notification'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
+import * as util from '../../components/util'
 
 export default {
 
@@ -402,7 +403,8 @@ export default {
         this.data = []
         for (var i in buckets) {
           var obj = {}
-          var date = new Date(buckets[i].key).toLocaleString()
+          // var date = new Date(buckets[i].key).toLocaleString()
+          var date = util.formatByInterval(new Date(buckets[i].key), this.interval)
           obj['name'] = date
           obj['count'] = buckets[i].doc_count
           obj['success'] = buckets[i].aggs_success.doc_count
