@@ -373,12 +373,8 @@ export default {
 
   watch: {
     interval: 'updateData',
-    dateRange: function (newVal, oldVal) {
-      console.log(newVal)
-      this.updateData()
-    },
+    dateRange: 'updateData',
     compareDateRange: function (newVal, oldVal) {
-      console.log(this.compareDateRange)
       if (this.compareDateRange && this.compareDateRange[0]) {
         this.updateCompareData()
       }
@@ -398,8 +394,6 @@ export default {
       }
     },
     updateData () {
-      var that = this   // 保存Vue对象的指针，否则子函数中无法获取
-      notify('info', 'Searching', 'Please wait for a few seconds...')
       client.search({
         index: 'tms-*',
         body: {
@@ -423,33 +417,31 @@ export default {
             }
           }
         }
-      }).then(function (body) {
+      }).then(body => {
         notify('success', 'Success', 'Successfully received data from server!')
         var buckets = body.aggregations.aggs_date.buckets
         if (buckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
         }
-        console.log(buckets)
-        that.legendData = []
-        that.data = []
-        that.dataArray = []
-        for (var i in buckets) {
+        this.legendData = []
+        this.data = []
+        this.dataArray = []
+        buckets.forEach(bucket => {
           var obj = {}
-          var date = new Date(buckets[i].key).toLocaleDateString()
-          var value = buckets[i].doc_count
-          that.legendData.push(date)
-          that.dataArray.push(value)
+          var date = new Date(bucket.key).toLocaleDateString()
+          var value = bucket.doc_count
+          this.legendData.push(date)
+          this.dataArray.push(value)
           obj['value'] = value
           obj['name'] = date
-          that.data.push(obj)
-        }
-      }, function (error) {
+          this.data.push(obj)
+        })
+      }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
       })
     },
     updateCompareData () {
-      var that = this   // 保存Vue对象的指针，否则子函数中无法获取
       client.search({
         index: 'tms-*',
         body: {
@@ -472,18 +464,17 @@ export default {
             }
           }
         }
-      }).then(function (body) {
+      }).then(body => {
         notify('success', 'Success', 'Successfully got data from server!')
         var buckets = body.aggregations.aggs_date.buckets
         if (buckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
         }
-        console.log(buckets)
-        that.compareDataArray = []
-        for (var i in buckets) {
-          that.compareDataArray.push(buckets[i].doc_count)
-        }
-      }, function (error) {
+        this.compareDataArray = []
+        buckets.forEach(bucket => {
+          this.compareDataArray.push(bucket.doc_count)
+        })
+      }, error => {
         notify('danger', 'Fail', 'Can not get data from server!')
         console.trace(error.message)
       })

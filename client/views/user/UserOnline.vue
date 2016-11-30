@@ -205,19 +205,13 @@ export default {
 
   computed: {
     legendData () {
-      return this.data.map(function (item) {
-        return item.name
-      })
+      return this.data.map(item => item.name)
     },
     onlineData () {
-      return this.data.map(function (item) {
-        return item.online
-      })
+      return this.data.map(item => item.online)
     },
     offlineData () {
-      return this.data.map(function (item) {
-        return item.offline
-      })
+      return this.data.map(item => item.offline)
     },
     timezone () {
       var offset = new Date().getTimezoneOffset() / 60
@@ -346,8 +340,6 @@ export default {
       }
     },
     updateData () {
-      var that = this   // 保存Vue对象的指针，否则子函数中无法获取
-      notify('info', 'Searching', 'Please wait for a few seconds...')
       client.search({
         index: 'tms-online-*',
         body: {
@@ -398,22 +390,22 @@ export default {
             }
           }
         }
-      }).then(function (body) {
+      }).then(body => {
         notify('success', 'Success', 'Successfully received data from server!')
         var buckets = body.aggregations.aggs_date.buckets
         if (buckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
         }
-        that.data = []
-        for (var i in buckets) {
+        this.data = []
+        buckets.forEach(bucket => {
           var obj = {}
-          var date = new Date(buckets[i].key).toLocaleString()
+          var date = new Date(bucket.key).toLocaleString()
           obj['name'] = date
-          obj['online'] = parseInt(buckets[i].aggs_online.value)
-          obj['offline'] = parseInt(buckets[i].aggs_offline.value)
-          that.data.push(obj)
-        }
-      }, function (error) {
+          obj['online'] = parseInt(bucket.aggs_online.value)
+          obj['offline'] = parseInt(bucket.aggs_offline.value)
+          this.data.push(obj)
+        })
+      }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
       })
@@ -473,14 +465,10 @@ export default {
             }
           }
         }
-      }).then(function (body) {
-        that.manufacturerList = body.aggregations.aggs_manufacturer.buckets.map(function (item) {
-          return item.key
-        })
-        that.modelList = body.aggregations.aggs_model.buckets.map(function (item) {
-          return item.key
-        })
-      }, function (error) {
+      }).then(body => {
+        that.manufacturerList = body.aggregations.aggs_manufacturer.buckets.map(item => item.key)
+        that.modelList = body.aggregations.aggs_model.buckets.map(item => item.key)
+      }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
       })
