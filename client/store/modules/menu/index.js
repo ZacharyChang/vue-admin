@@ -5,6 +5,7 @@ import uifeatures from './uifeatures'
 import components from './components'
 import tables from './tables'
 import user from './user'
+import system from './system'
 
 // show: meta.label -> name
 // name: component name
@@ -24,7 +25,8 @@ const state = {
     uifeatures,
     components,
     tables,
-    user
+    user,
+    system
   ]
 }
 
