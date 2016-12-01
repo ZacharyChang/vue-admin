@@ -21,3 +21,14 @@ export function formatByInterval (date, interval) {
   }
   return moment(date).format(format)
 }
+
+export function timezone () {
+  var offset = new Date().getTimezoneOffset() / 60
+  var abs = Math.abs(offset)
+  var str = '0' + abs + ':00'
+  // the timezone is opposite to the offset
+  if (offset > 0) {
+    return '-' + str.slice(-5)
+  }
+  return '+' + str.slice(-5)
+}

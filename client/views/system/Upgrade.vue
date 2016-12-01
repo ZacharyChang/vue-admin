@@ -32,13 +32,13 @@
                       </a>
                       <a class="button" :class="{ 'is-primary': this.interval === 'week' }" @click="interval='week'">
                         <span class="icon is-small">
-                          <i class="fa fa-align-center"></i>
+                          <i class="fa fa-align-left"></i>
                         </span>
                         <span>Week</span>
                       </a>
                       <a class="button" :class="{ 'is-primary': this.interval === 'day' }" @click="interval='day'">
                         <span class="icon is-small">
-                          <i class="fa fa-align-right"></i>
+                          <i class="fa fa-align-center"></i>
                         </span>
                         <span>Day</span>
                       </a>
@@ -140,7 +140,13 @@
       </div>
     </div>
     <div class="tile is-ancestor">
-      <div class="tile is-parent is-12">
+      <div class="tile is-parent is-6">
+        <article class="tile is-child box">
+          <h4 class="title">System Upgrade Percent</h4>
+          <echart :options="pie" style="width:100%"></echart>
+        </article>
+      </div>
+      <div class="tile is-parent is-6">
         <article class="tile is-child box">
           <h4 class="title">System Upgrade Number</h4>
           <echart :options="line" style="width:100%"></echart>
@@ -188,6 +194,7 @@ import client from '../../elastic'
 import notify from '../../components/notification'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
 import * as util from '../../components/util'
+import { Tabs, TabPane } from 'vue-bulma-tabs'
 
 export default {
 
@@ -195,7 +202,9 @@ export default {
     VbSwitch,
     echart: ECharts,
     Collapse,
-    CollapseItem
+    CollapseItem,
+    Tabs,
+    TabPane
   },
 
   data () {
@@ -207,8 +216,8 @@ export default {
           return time.getTime() > Date.now()
         }
       },
-      pieLimit: 20,
       data: [],
+      percentData: [],
       isCompare: false,
       compareData: [],
       manufacturerList: [],
@@ -231,16 +240,6 @@ export default {
     failData () {
       return this.data.map(item => item.fail)
     },
-    timezone () {
-      var offset = new Date().getTimezoneOffset() / 60
-      var abs = Math.abs(offset)
-      var str = '0' + abs + ':00'
-      // the timezone is opposite to the offset
-      if (offset > 0) {
-        return '-' + str.slice(-5)
-      }
-      return '+' + str.slice(-5)
-    },
     dateStart () {
       if (this.dateRange) {
         return this.dateRange[0]
@@ -254,10 +253,7 @@ export default {
       }
     },
     sum () {
-      if (this.countData.length > 0) {
-        return this.countData.reduce((a, b) => a + b, 0)
-      }
-      return 0
+      return this.countData.reduce((a, b) => a + b, 0)
     },
     max () {
       if (this.countData.length > 0) {
@@ -276,6 +272,18 @@ export default {
         return parseInt(this.sum / (this.countData.length))
       }
       return 0
+    },
+    percentOption () {
+      if (this.model === '_all') {
+        return 'model.keyword'
+      }
+      return 'upgrade_version.keyword'
+    },
+    percentLegend () {
+      if (this.model === '_all') {
+        return 'Model'
+      }
+      return 'Upgrade Version'
     },
     condition () {
       var condition = [{
@@ -298,12 +306,46 @@ export default {
       }
       return condition
     },
+    pie () {
+      return {
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b} : {c} ({d}%)'
+        },
+        legend: {
+          data: this.percentData.slice(0, 20).map(item => item.name),
+          textStyle: {
+            fontSize: 14
+          }
+        },
+        series: [{
+          name: this.percentLegend,
+          type: 'pie',
+          radius: '60%',
+          center: ['50%', '60%'],
+          data: this.percentData.slice(0, 20),
+          itemStyle: {
+            emphasis: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }]
+      }
+    },
     line () {
       return {
         tooltip: {
           trigger: 'axis',
           axisPointer: {            // 坐标轴指示器，坐标轴触发有效
             type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+          }
+        },
+        legend: {
+          data: ['Success', 'Fail'],
+          textStyle: {
+            fontSize: 14
           }
         },
         grid: {
@@ -321,9 +363,22 @@ export default {
         }],
         series: [
           {
-            name: 'Count',
+            name: 'Success',
             type: 'line',
-            data: this.countData,
+            data: this.successData,
+            stack: 'All',
+            itemStyle: {
+              normal: {
+                lineStyle: {
+                  color: '#1fc8db'
+                }
+              }
+            }
+          },
+          {
+            name: 'Fail',
+            type: 'line',
+            data: this.failData,
             stack: 'All',
             itemStyle: {
               normal: {
@@ -357,7 +412,6 @@ export default {
 
   methods: {
     updateData () {
-      notify('info', 'Searching', 'Please wait for a few seconds...')
       client.search({
         index: 'tms-*',
         type: 'system_upgrade',
@@ -373,7 +427,7 @@ export default {
               date_histogram: {
                 field: '@timestamp',
                 interval: this.interval,
-                time_zone: this.timezone
+                time_zone: util.timezone()
               },
               aggs: {
                 aggs_success: {
@@ -391,26 +445,32 @@ export default {
                   }
                 }
               }
+            },
+            aggs_percent: {
+              terms: {
+                field: this.percentOption
+              }
             }
           }
         }
       }).then(body => {
         notify('success', 'Success', 'Successfully received data from server!')
-        var buckets = body.aggregations.aggs_date.buckets
-        if (buckets.length === 0) {
+        let dateBuckets = body.aggregations.aggs_date.buckets
+        if (dateBuckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
+        } else {
+          this.data = dateBuckets.map(bucket => ({
+            'name': util.formatByInterval(new Date(bucket.key), this.interval),
+            'count': bucket.doc_count,
+            'success': bucket.aggs_success.doc_count,
+            'fail': bucket.aggs_fail.doc_count
+          }))
         }
-        this.data = []
-        for (var i in buckets) {
-          var obj = {}
-          // var date = new Date(buckets[i].key).toLocaleString()
-          var date = util.formatByInterval(new Date(buckets[i].key), this.interval)
-          obj['name'] = date
-          obj['count'] = buckets[i].doc_count
-          obj['success'] = buckets[i].aggs_success.doc_count
-          obj['fail'] = buckets[i].aggs_fail.doc_count
-          this.data.push(obj)
-        }
+        this.percentData = body.aggregations.aggs_percent.buckets.map(bucket => ({
+          'name': bucket.key,
+          'value': bucket.doc_count
+        }))
+        console.log(this.percentData)
       }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
@@ -420,7 +480,7 @@ export default {
       var data = this.data
       var csvContent = 'data:text/csv;charset=utf-8,'
       data.forEach(function (value, index) {
-        csvContent += value.name + ',' + value.success + value.fail + value.count + '\r\n'
+        csvContent += value.name + ',' + value.success + ',' + value.fail + ',' + value.count + '\r\n'
       })
       var encodedUri = encodeURI(csvContent)
       var link = document.createElement('a')
@@ -436,22 +496,6 @@ export default {
         type: 'system_upgrade',
         body: {
           size: 0,
-          query: {
-            bool: {
-              must_not: [
-                {
-                  term: {
-                    'manufacturer.keyword': '_all'
-                  }
-                },
-                {
-                  term: {
-                    'model.keyword': '_all'
-                  }
-                }
-              ]
-            }
-          },
           aggs: {
             aggs_model: {
               terms: {
