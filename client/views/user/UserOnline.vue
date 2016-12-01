@@ -291,9 +291,12 @@ export default {
             stack: 'All',
             itemStyle: {
               normal: {
-                lineStyle: {
-                  color: '#ff3860'
-                }
+                color: '#1fc8db'
+              }
+            },
+            lineStyle: {
+              normal: {
+                color: '#1fc8db'
               }
             }
           },
@@ -304,9 +307,12 @@ export default {
             stack: 'All',
             itemStyle: {
               normal: {
-                lineStyle: {
-                  color: '#1fc8db'
-                }
+                color: '#ff3860'
+              }
+            },
+            lineStyle: {
+              normal: {
+                color: '#ff3860'
               }
             }
           }
@@ -341,7 +347,8 @@ export default {
     },
     updateData () {
       client.search({
-        index: 'tms-online-*',
+        index: 'tms-*',
+        type: 'online',
         body: {
           size: 0,
           'query': {
@@ -427,7 +434,8 @@ export default {
     getList () {
       var that = this   // 保存Vue对象的指针，否则子函数中无法获取
       client.search({
-        index: 'tms-online-*',
+        index: 'tms-*',
+        type: 'online',
         body: {
           size: 0,
           query: {

@@ -369,9 +369,12 @@ export default {
             stack: 'All',
             itemStyle: {
               normal: {
-                lineStyle: {
-                  color: '#1fc8db'
-                }
+                color: '#1fc8db'
+              }
+            },
+            lineStyle: {
+              normal: {
+                color: '#1fc8db'
               }
             }
           },
@@ -382,9 +385,12 @@ export default {
             stack: 'All',
             itemStyle: {
               normal: {
-                lineStyle: {
-                  color: '#ff3860'
-                }
+                color: '#ff3860'
+              }
+            },
+            lineStyle: {
+              normal: {
+                color: '#ff3860'
               }
             }
           }
