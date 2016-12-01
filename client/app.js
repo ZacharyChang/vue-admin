@@ -7,7 +7,7 @@ import router from './router'
 import store from './store'
 import * as filters from './filters'
 import { TOGGLE_SIDEBAR } from 'vuex-store/mutation-types'
-import { DatePicker } from 'element-ui'
+import { DatePicker, Autocomplete } from 'element-ui'
 import lang from 'element-ui/lib/locale/lang/en'
 import locale from 'element-ui/lib/locale'
 
@@ -16,6 +16,7 @@ Vue.use(NProgress)
 
 locale.use(lang)
 Vue.use(DatePicker)
+Vue.use(Autocomplete)
 
 sync(store, router)
 

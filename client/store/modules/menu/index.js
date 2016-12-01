@@ -6,6 +6,7 @@ import components from './components'
 import tables from './tables'
 import user from './user'
 import system from './system'
+import app from './app'
 
 // show: meta.label -> name
 // name: component name
@@ -26,7 +27,8 @@ const state = {
     components,
     tables,
     user,
-    system
+    system,
+    app
   ]
 }
 
