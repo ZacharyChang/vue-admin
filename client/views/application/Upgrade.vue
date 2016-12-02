@@ -18,66 +18,36 @@
                     </el-date-picker>
                   </p>
                 </div>
-                <div class="column is-6">
-                  <p class="control">
-                    <label class="label">Interval:</label>
-                    <a class="button" :class="{ 'is-primary': this.interval === 'month' }" @click="interval='month'">
-                        <span class="icon is-small">
-                          <i class="fa fa-align-left"></i>
-                        </span>
-                      <span>Month</span>
-                    </a>
-                    <a class="button" :class="{ 'is-primary': this.interval === 'week' }" @click="interval='week'">
-                        <span class="icon is-small">
-                          <i class="fa fa-align-left"></i>
-                        </span>
-                      <span>Week</span>
-                    </a>
-                    <a class="button" :class="{ 'is-primary': this.interval === 'day' }" @click="interval='day'">
-                        <span class="icon is-small">
-                          <i class="fa fa-align-center"></i>
-                        </span>
-                      <span>Day</span>
-                    </a>
-                    <a class="button" :class="{ 'is-primary': this.interval === 'hour' }" @click="interval='hour'">
-                        <span class="icon is-small">
-                          <i class="fa fa-align-right"></i>
-                        </span>
-                      <span>Hour</span>
-                    </a>
-                    <a class="button" :class="{ 'is-primary': this.interval === 'minute' }" @click="interval='minute'">
-                        <span class="icon is-small">
-                          <i class="fa fa-align-right"></i>
-                        </span>
-                      <span>Minute</span>
-                    </a>
-                  </p>
-                </div>
               </div>
               <collapse-item title="More.." selected>
                 <div class="columns">
                   <div class="column">
                     <p class="control">
-                      <label class="label">Manufacturer:</label>
-                      <span class="select">
-                        <select v-model="manufacturer">
-                          <option value="_all">All</option>
-                          <option v-for="(item, index) in manufacturerList">
-                            {{item}}
-                          </option>
-                        </select>
-                      </span>
-                    </p>
-                  </div>
-                  <div class="column">
-                    <p class="control">
-                      <label class="label">Model:</label>
-                      <span class="select">
-                        <select v-model="model">
-                          <option value="_all">All</option>
-                          <option v-for="(item, index) in modelList">{{item}}</option>
-                        </select>
-                      </span>
+                      <label class="label">Interval:</label>
+                      <a class="button" :class="{ 'is-primary': this.interval === 'month' }" @click="interval='month'">
+                        <span class="icon is-small">
+                          <i class="fa fa-align-left"></i>
+                        </span>
+                        <span>Month</span>
+                      </a>
+                      <a class="button" :class="{ 'is-primary': this.interval === 'week' }" @click="interval='week'">
+                        <span class="icon is-small">
+                          <i class="fa fa-align-left"></i>
+                        </span>
+                        <span>Week</span>
+                      </a>
+                      <a class="button" :class="{ 'is-primary': this.interval === 'day' }" @click="interval='day'">
+                        <span class="icon is-small">
+                          <i class="fa fa-align-center"></i>
+                        </span>
+                        <span>Day</span>
+                      </a>
+                      <a class="button" :class="{ 'is-primary': this.interval === 'hour' }" @click="interval='hour'">
+                        <span class="icon is-small">
+                          <i class="fa fa-align-right"></i>
+                        </span>
+                        <span>Hour</span>
+                      </a>
                     </p>
                   </div>
                   <div class="column">
@@ -87,7 +57,7 @@
                         class="inline-input"
                         v-model="appName"
                         :fetch-suggestions="filterApp"
-                        style="position:fixed"
+                        style="position:fixed;z-index:2"
                       ></el-autocomplete>
                     </p>
                   </div>
@@ -239,13 +209,10 @@ export default {
         }
       },
       data: [],
+      percentLegend: 'APP Name',
       percentData: [],
       isCompare: false,
       compareData: [],
-      manufacturerList: [],
-      modelList: [],
-      manufacturer: '_all',
-      model: '_all',
       appList: [],
       appName: '',
       classList: [],
@@ -300,14 +267,14 @@ export default {
       return 0
     },
     percentOption () {
-      if (this.model === '_all') {
-        return 'model.keyword'
+      if (this.appName === '' && this.className === '') {
+        return 'app_name.keyword'
       }
       return 'upgrade_version.keyword'
     },
     percentLegend () {
-      if (this.model === '_all') {
-        return 'Model'
+      if (this.appName === '' && this.className === '') {
+        return 'APP Name'
       }
       return 'Upgrade Version'
     },
@@ -320,14 +287,14 @@ export default {
           }
         }
       }]
-      if (this.manufacturer !== '_all') {
+      if (this.appName !== '') {
         condition.push({'term': {
-          'manufacturer.keyword': this.manufacturer
+          'app_name.keyword': this.appName
         }})
       }
-      if (this.model !== '_all') {
+      if (this.className !== '') {
         condition.push({'term': {
-          'model.keyword': this.model
+          'class_name.keyword': this.className
         }})
       }
       return condition
@@ -339,7 +306,7 @@ export default {
           formatter: '{a} <br/>{b} : {c} ({d}%)'
         },
         legend: {
-          data: this.percentData.slice(0, 20).map(item => item.name),
+          data: this.percentData.slice(0, 20),
           textStyle: {
             fontSize: 14
           }
@@ -350,6 +317,11 @@ export default {
           radius: '60%',
           center: ['50%', '60%'],
           data: this.percentData.slice(0, 20),
+          label: {
+            normal: {
+              position: 'inner'
+            }
+          },
           itemStyle: {
             emphasis: {
               shadowBlur: 10,
@@ -369,7 +341,7 @@ export default {
           }
         },
         legend: {
-          data: ['Success', 'Fail'],
+          data: ['Success', 'Fail', 'Count'],
           textStyle: {
             fontSize: 14
           }
@@ -417,6 +389,21 @@ export default {
                 color: '#ff3860'
               }
             }
+          },
+          {
+            name: 'Count',
+            type: 'bar',
+            data: this.countData,
+            itemStyle: {
+              normal: {
+                color: '#3273dc'
+              }
+            },
+            lineStyle: {
+              normal: {
+                color: '#3273dc'
+              }
+            }
           }
         ]
       }
@@ -426,8 +413,26 @@ export default {
   watch: {
     interval: 'updateData',
     dateRange: 'updateData',
-    manufacturer: 'updateData',
-    model: 'updateData',
+    appName: function (newVal) {
+      if (newVal === '') {
+        this.updateData()
+      } else {
+        let appNames = this.appList.map(item => item.value)
+        if (appNames.indexOf(newVal) > -1) {
+          this.updateData()
+        }
+      }
+    },
+    className: function (newVal) {
+      if (newVal === '') {
+        this.updateData()
+      } else {
+        let classNames = this.classList.map(item => item.value)
+        if (classNames.indexOf(newVal) > -1) {
+          this.updateData()
+        }
+      }
+    },
     compareDateRange: function (newVal, oldVal) {
       if (this.compareDateRange && this.compareDateRange[0]) {
         this.updateCompareData()
@@ -572,12 +577,12 @@ export default {
       })
     },
     filterApp (queryString, callback) {
-      let results = queryString ? this.appList.filter(object => object.value.indexOf(queryString.toLowerCase()) === 0) : this.appList
+      let results = queryString ? this.appList.filter(object => object.value.indexOf(queryString) > -1) : this.appList
       // 调用 callback 返回建议列表的数据
       callback(results)
     },
     filterClass (queryString, callback) {
-      let results = queryString ? this.classList.filter(object => object.value.indexOf(queryString) === 0) : this.classList
+      let results = queryString ? this.classList.filter(object => object.value.indexOf(queryString) > -1) : this.classList
       // 调用 callback 返回建议列表的数据
       callback(results)
     }
