@@ -14,6 +14,11 @@ export default {
       name: 'System Upgrade',
       path: 'upgrade',
       component: lazyLoading('system/Upgrade')
+    },
+    {
+      name: 'System Distribution',
+      path: 'distribution',
+      component: lazyLoading('system/Distribution')
     }
   ]
 }
