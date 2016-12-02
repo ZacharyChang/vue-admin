@@ -174,6 +174,7 @@ import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
 import client from '../../elastic'
 import notify from '../../components/notification'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
+import * as util from '../../components/util'
 
 export default {
 
@@ -212,16 +213,6 @@ export default {
     },
     offlineData () {
       return this.data.map(item => item.offline)
-    },
-    timezone () {
-      var offset = new Date().getTimezoneOffset() / 60
-      var abs = Math.abs(offset)
-      var str = '0' + abs + ':00'
-      // the timezone is opposite to the offset
-      if (offset > 0) {
-        return '-' + str.slice(-5)
-      }
-      return '+' + str.slice(-5)
     },
     dateStart () {
       if (this.dateRange) {
@@ -380,7 +371,7 @@ export default {
               date_histogram: {
                 field: '@timestamp',
                 interval: this.interval,
-                time_zone: this.timezone
+                time_zone: util.timezone()
               },
               aggs: {
                 aggs_online: {
@@ -403,15 +394,11 @@ export default {
         if (buckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
         }
-        this.data = []
-        buckets.forEach(bucket => {
-          var obj = {}
-          var date = new Date(bucket.key).toLocaleString()
-          obj['name'] = date
-          obj['online'] = parseInt(bucket.aggs_online.value)
-          obj['offline'] = parseInt(bucket.aggs_offline.value)
-          this.data.push(obj)
-        })
+        this.data = buckets.map(bucket => ({
+          'name': util.formatByInterval(new Date(bucket.key), this.interval),
+          'online': parseInt(bucket.aggs_online.value),
+          'offline': parseInt(bucket.aggs_offline.value)
+        }))
       }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
