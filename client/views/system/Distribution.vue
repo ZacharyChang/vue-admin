@@ -44,7 +44,6 @@ import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
 import client from '../../elastic'
 import notify from '../../components/notification'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
-import * as util from '../../components/util'
 import { Tabs, TabPane } from 'vue-bulma-tabs'
 
 export default {
@@ -124,44 +123,44 @@ export default {
       return {
         tooltip: {},
         series: [{
-            name: 'Model',
-            type: 'treemap',
-            visibleMin: 300,
-            data: this.data,
-            leafDepth: 1,
-            levels: [
-                {
-                    itemStyle: {
-                        normal: {
-                            borderColor: '#555',
-                            borderWidth: 4,
-                            gapWidth: 4
-                        }
-                    }
-                },
-                {
-                    colorSaturation: [0.3, 0.6],
-                    itemStyle: {
-                        normal: {
-                            borderColorSaturation: 0.7,
-                            gapWidth: 2,
-                            borderWidth: 2
-                        }
-                    }
-                },
-                {
-                    colorSaturation: [0.3, 0.5],
-                    itemStyle: {
-                        normal: {
-                            borderColorSaturation: 0.6,
-                            gapWidth: 1
-                        }
-                    }
-                },
-                {
-                    colorSaturation: [0.3, 0.5]
+          name: 'Model',
+          type: 'treemap',
+          visibleMin: 300,
+          data: this.data,
+          leafDepth: 1,
+          levels: [
+            {
+              itemStyle: {
+                normal: {
+                  borderColor: '#555',
+                  borderWidth: 4,
+                  gapWidth: 4
                 }
-            ]
+              }
+            },
+            {
+              colorSaturation: [0.3, 0.6],
+              itemStyle: {
+                normal: {
+                  borderColorSaturation: 0.7,
+                  gapWidth: 2,
+                  borderWidth: 2
+                }
+              }
+            },
+            {
+              colorSaturation: [0.3, 0.5],
+              itemStyle: {
+                normal: {
+                  borderColorSaturation: 0.6,
+                  gapWidth: 1
+                }
+              }
+            },
+            {
+              colorSaturation: [0.3, 0.5]
+            }
+          ]
         }]
       }
     }
@@ -190,7 +189,7 @@ export default {
               aggs: {
                 aggs_version: {
                   terms: {
-                    field: "current_software.keyword",
+                    field: 'current_software.keyword',
                     size: 20
                   }
                 }
