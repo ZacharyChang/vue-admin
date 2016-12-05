@@ -464,19 +464,17 @@ export default {
         let dateBuckets = body.aggregations.aggs_date.buckets
         if (dateBuckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
-        } else {
-          this.data = dateBuckets.map(bucket => ({
-            'name': util.formatByInterval(new Date(bucket.key), this.interval),
-            'count': bucket.doc_count,
-            'success': bucket.aggs_success.doc_count,
-            'fail': bucket.aggs_fail.doc_count
-          }))
         }
+        this.data = dateBuckets.map(bucket => ({
+          'name': util.formatByInterval(new Date(bucket.key), this.interval),
+          'count': bucket.doc_count,
+          'success': bucket.aggs_success.doc_count,
+          'fail': bucket.aggs_fail.doc_count
+        }))
         this.percentData = body.aggregations.aggs_percent.buckets.map(bucket => ({
           'name': bucket.key,
           'value': bucket.doc_count
         }))
-        console.log(this.percentData)
       }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)

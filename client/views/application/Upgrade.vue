@@ -493,14 +493,13 @@ export default {
         let dateBuckets = body.aggregations.aggs_date.buckets
         if (dateBuckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
-        } else {
-          this.data = dateBuckets.map(bucket => ({
-            'name': util.formatByInterval(new Date(bucket.key), this.interval),
-            'count': bucket.doc_count,
-            'success': bucket.aggs_success.doc_count,
-            'fail': bucket.aggs_fail.doc_count
-          }))
         }
+        this.data = dateBuckets.map(bucket => ({
+          'name': util.formatByInterval(new Date(bucket.key), this.interval),
+          'count': bucket.doc_count,
+          'success': bucket.aggs_success.doc_count,
+          'fail': bucket.aggs_fail.doc_count
+        }))
         this.percentData = body.aggregations.aggs_percent.buckets.map(bucket => ({
           'name': bucket.key,
           'value': bucket.doc_count
@@ -570,7 +569,6 @@ export default {
         this.modelList = body.aggregations.aggs_model.buckets.map(item => item.key)
         this.appList = body.aggregations.aggs_app.buckets.map(item => ({'value': item.key}))
         this.classList = body.aggregations.aggs_class.buckets.map(item => ({'value': item.key}))
-        console.log(this.appList)
       }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
@@ -578,12 +576,10 @@ export default {
     },
     filterApp (queryString, callback) {
       let results = queryString ? this.appList.filter(object => object.value.indexOf(queryString) > -1) : this.appList
-      // 调用 callback 返回建议列表的数据
       callback(results)
     },
     filterClass (queryString, callback) {
       let results = queryString ? this.classList.filter(object => object.value.indexOf(queryString) > -1) : this.classList
-      // 调用 callback 返回建议列表的数据
       callback(results)
     }
   }

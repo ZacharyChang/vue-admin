@@ -11,7 +11,7 @@
                     <p class="control">
                       <label class="label">Date:</label>
                       <el-date-picker
-                        v-model="dateRange"
+                        v-model="date"
                         type="date"
                         placeholder="Select Time Range..."
                         style="width:80%">
@@ -35,6 +35,39 @@
         </article>
       </div>
     </div>
+    <div class="tile is-ancestor">
+      <div class="tile is-parent">
+        <article class="tile is-child box">
+          <h4 class="title">Table
+            <a class="button is-primary is-outlined" style="float:right" @click="getExcel">
+              <span class="icon is-small">
+                <i class="fa fa-file-excel-o"></i>
+              </span>
+              <span>Export Excel</span>
+            </a></h4>
+          <table class="table is-bordered">
+            <thead>
+            <tr>
+              <th>Model</th>
+              <th>Count</th>
+              <th>Version</th>
+              <th>Count</th>
+            </tr>
+            </thead>
+            <tbody>
+            <template v-for="item in data">
+              <td :rowspan="item.children.length + 1" style="vertical-align:middle">{{item.name}}</td>
+              <td :rowspan="item.children.length + 1" style="vertical-align:middle">{{item.value}}</td>
+              <tr v-for="(version, index) in item.children">
+                <td>{{version.name}}</td>
+                <td>{{version.value}}</td>
+              </tr>
+            </template>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -45,6 +78,7 @@ import client from '../../elastic'
 import notify from '../../components/notification'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
 import { Tabs, TabPane } from 'vue-bulma-tabs'
+import * as util from '../../components/util'
 
 export default {
 
@@ -59,7 +93,7 @@ export default {
 
   data () {
     return {
-      dateRange: null,
+      date: new Date(),
       pickerOptions: {
         disabledDate (time) {
           return time.getTime() > Date.now()
@@ -71,20 +105,14 @@ export default {
   },
 
   computed: {
+    day () {
+      return util.getDate(this.date)
+    },
+    nextDay () {
+      return util.nextDay(this.date)
+    },
     legendData () {
       return this.data.map(item => item.name)
-    },
-    dateStart () {
-      if (this.dateRange) {
-        return this.dateRange[0]
-      }
-    },
-    dateEnd () {
-      if (this.dateRange) {
-        var end = new Date(this.dateRange[1])
-        end.setDate(end.getDate() + 1)
-        return end
-      }
     },
     percentOption () {
       if (this.model === '_all') {
@@ -97,27 +125,6 @@ export default {
         return 'Model'
       }
       return 'Upgrade Version'
-    },
-    condition () {
-      var condition = [{
-        'range': {
-          '@timestamp': {
-            'gte': this.dateStart,
-            'lt': this.dateEnd
-          }
-        }
-      }]
-      if (this.manufacturer !== '_all') {
-        condition.push({'term': {
-          'manufacturer.keyword': this.manufacturer
-        }})
-      }
-      if (this.model !== '_all') {
-        condition.push({'term': {
-          'model.keyword': this.model
-        }})
-      }
-      return condition
     },
     treemap () {
       return {
@@ -167,7 +174,7 @@ export default {
   },
 
   watch: {
-    dateRange: 'updateData'
+    date: 'updateData'
   },
 
   mounted: function () {
@@ -177,9 +184,19 @@ export default {
   methods: {
     updateData () {
       client.search({
-        index: 'tms-device-*',
+        index: 'tms-*',
+        type: 'device',
         body: {
           size: 0,
+          query: {
+            range: {
+              '@timestamp': {
+                gte: this.day,
+                lt: this.nextDay,
+                time_zone: util.timezone()
+              }
+            }
+          },
           aggs: {
             aggs_model: {
               terms: {
@@ -202,21 +219,36 @@ export default {
         let buckets = body.aggregations.aggs_model.buckets
         if (buckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
-        } else {
-          this.data = buckets.map(bucket => ({
-            'name': bucket.key,
-            'children': bucket.aggs_version.buckets.map(bucket => ({
-              'name': bucket.key,
-              'value': bucket.doc_count
-            }))
-          }))
-          console.log(this.data)
         }
+        this.data = buckets.map(bucket => ({
+          'name': bucket.key,
+          'value': bucket.doc_count,
+          'children': bucket.aggs_version.buckets.map(bucket => ({
+            'name': bucket.key,
+            'value': bucket.doc_count
+          }))
+        }))
       }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
       })
-    }
+    },
+    getExcel () {
+      var data = this.data
+      var csvContent = 'data:text/csv;charset=utf-8,'
+      data.forEach(model =>
+        model.children.forEach(version =>
+          csvContent += model.name + ',' + model.value + ',' + version.name + ',' + version.value + '\r\n'
+        )
+      )
+      var encodedUri = encodeURI(csvContent)
+      var link = document.createElement('a')
+      link.setAttribute('href', encodedUri)
+      link.setAttribute('download', 'tms_system_distribution.csv')
+      document.body.appendChild(link)  // Required for FF
+      link.click()
+      document.body.removeChild(link)
+    },
   }
 }
 </script>
