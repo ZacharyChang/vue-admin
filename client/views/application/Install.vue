@@ -81,47 +81,19 @@
           <nav class="level">
             <div class="level-item has-text-centered">
               <p class="heading">Total</p>
-              <p v-if="isCompare" class="title">
-                {{sum}}
-                <i v-if="compareMax > max" aria-hidden="true" class="greater fa fa-long-arrow-up"></i>
-                <i v-if="compareMax < max" aria-hidden="true" class="lesser fa fa-long-arrow-down"></i>
-                <i v-if="compareMax == max" aria-hidden="true" class="equal fa fa-exchange"></i>
-                {{compareSum}}
-              </p>
-              <p v-else class="title">{{sum}}</p>
+              <p class="title">{{sum}}</p>
             </div>
             <div class="level-item has-text-centered">
               <p class="heading">Maximum</p>
-              <p v-if="isCompare" class="title">
-                {{max}}
-                <i v-if="compareMax > max" aria-hidden="true" class="greater fa fa-long-arrow-up"></i>
-                <i v-if="compareMax < max" aria-hidden="true" class="lesser fa fa-long-arrow-down"></i>
-                <i v-if="compareMax == max" aria-hidden="true" class="equal fa fa-exchange"></i>
-                {{compareMax}}
-              </p>
-              <p v-else class="title">{{max}}</p>
+              <p class="title">{{max}}</p>
             </div>
             <div class="level-item has-text-centered">
               <p class="heading">Minimum</p>
-              <p v-if="isCompare" class="title">
-                {{min}}
-                <i v-if="compareMin > min" aria-hidden="true" class="greater fa fa-long-arrow-up"></i>
-                <i v-if="compareMin < min" aria-hidden="true" class="lesser fa fa-long-arrow-down"></i>
-                <i v-if="compareMin == min" aria-hidden="true" class="equal fa fa-exchange"></i>
-                {{compareMin}}
-              </p>
-              <p v-else class="title">{{min}}</p>
+              <p class="title">{{min}}</p>
             </div>
             <div class="level-item has-text-centered">
               <p class="heading">Average</p>
-              <p v-if="isCompare" class="title">
-                {{avg}}
-                <i v-if="compareAvg > avg" aria-hidden="true" class="greater fa fa-long-arrow-up"></i>
-                <i v-if="compareAvg < avg" aria-hidden="true" class="lesser fa fa-long-arrow-down"></i>
-                <i v-if="compareAvg == avg" aria-hidden="true" class="equal fa fa-exchange"></i>
-                {{compareAvg}}
-              </p>
-              <p v-else class="title">{{avg}}</p>
+              <p class="title">{{avg}}</p>
             </div>
           </nav>
         </article>
@@ -130,13 +102,13 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
-          <h4 class="title">APP Upgrade Percent</h4>
+          <h4 class="title">APP Install Percent</h4>
           <echart :options="pie" style="width:100%"></echart>
         </article>
       </div>
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
-          <h4 class="title">APP Upgrade Number</h4>
+          <h4 class="title">APP Install Number</h4>
           <echart :options="line" style="width:100%"></echart>
         </article>
       </div>
@@ -438,7 +410,7 @@ export default {
     updateData () {
       client.search({
         index: 'tms-*',
-        type: 'app_upgrade',
+        type: 'app_install',
         body: {
           size: 0,
           'query': {
@@ -478,7 +450,7 @@ export default {
             },
             aggs_version: {
               terms: {
-                field: 'upgrade_version.keyword',
+                field: 'app_version.keyword',
                 size: 20
               }
             }
@@ -518,7 +490,7 @@ export default {
       var encodedUri = encodeURI(csvContent)
       var link = document.createElement('a')
       link.setAttribute('href', encodedUri)
-      link.setAttribute('download', 'tms_app_upgrade.csv')
+      link.setAttribute('download', 'tms_app_install.csv')
       document.body.appendChild(link)  // Required for FF
       link.click()
       document.body.removeChild(link)
@@ -526,7 +498,7 @@ export default {
     getList () {
       client.search({
         index: 'tms-*',
-        type: 'app_upgrade',
+        type: 'app_install',
         body: {
           size: 0,
           aggs: {
