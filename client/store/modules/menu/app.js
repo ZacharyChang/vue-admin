@@ -14,6 +14,11 @@ export default {
       name: 'APP Upgrade',
       path: 'upgrade',
       component: lazyLoading('application/Upgrade')
+    },
+    {
+      name: 'APP Install',
+      path: 'install',
+      component: lazyLoading('application/Install')
     }
   ]
 }
