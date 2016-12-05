@@ -3,7 +3,7 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent">
         <article class="tile is-child box">
-          <h1 class="title">Conditions:</h1>
+          <h1 class="title">Conditions</h1>
           <div class="block is-flex">
             <collapse>
               <div class="columns">
@@ -60,10 +60,10 @@
                 </div>
                 <div class="column">
                   <p class="control">
-                    <label class="label">Class Name:</label>
+                    <label class="label">Package Name:</label>
                     <el-autocomplete
                       class="inline-input"
-                      v-model="className"
+                      v-model="packageName"
                       :fetch-suggestions="filterClass"
                       style="position:fixed;z-index:2"
                     ></el-autocomplete>
@@ -211,8 +211,8 @@ export default {
       compareData: [],
       appList: [],
       appName: '',
-      classList: [],
-      className: ''
+      packageList: [],
+      packageName: ''
     }
   },
 
@@ -276,9 +276,9 @@ export default {
           'app_name.keyword': this.appName
         }})
       }
-      if (this.className !== '') {
+      if (this.packageName !== '') {
         condition.push({'term': {
-          'class_name.keyword': this.className
+          'package_name.keyword': this.packageName
         }})
       }
       return condition
@@ -412,12 +412,12 @@ export default {
         }
       }
     },
-    className: function (newVal) {
+    packageName: function (newVal) {
       if (newVal === '') {
         this.updateData()
       } else {
-        let classNames = this.classList.map(item => item.value)
-        if (classNames.indexOf(newVal) > -1) {
+        let packageNames = this.packageList.map(item => item.value)
+        if (packageNames.indexOf(newVal) > -1) {
           this.updateData()
         }
       }
@@ -554,9 +554,9 @@ export default {
                 }
               }
             },
-            aggs_class: {
+            aggs_package: {
               terms: {
-                field: 'class_name.keyword',
+                field: 'package_name.keyword',
                 order: {
                   _term: 'asc'
                 }
@@ -568,7 +568,7 @@ export default {
         this.manufacturerList = body.aggregations.aggs_manufacturer.buckets.map(item => item.key)
         this.modelList = body.aggregations.aggs_model.buckets.map(item => item.key)
         this.appList = body.aggregations.aggs_app.buckets.map(item => ({'value': item.key}))
-        this.classList = body.aggregations.aggs_class.buckets.map(item => ({'value': item.key}))
+        this.packageList = body.aggregations.aggs_package.buckets.map(item => ({'value': item.key}))
       }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
@@ -579,7 +579,7 @@ export default {
       callback(results)
     },
     filterClass (queryString, callback) {
-      let results = queryString ? this.classList.filter(object => object.value.toLowerCase().indexOf(queryString.toLowerCase()) > -1) : this.classList
+      let results = queryString ? this.packageList.filter(object => object.value.toLowerCase().indexOf(queryString.toLowerCase()) > -1) : this.packageList
       callback(results)
     }
   }

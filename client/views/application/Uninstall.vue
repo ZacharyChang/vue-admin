@@ -3,7 +3,7 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent">
         <article class="tile is-child box">
-          <h1 class="title">Conditions</h1>
+          <h1 class="title">Conditions:</h1>
           <div class="block is-flex">
             <collapse>
               <div class="columns">
@@ -102,13 +102,13 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
-          <h4 class="title">APP Install Percent</h4>
+          <h4 class="title">APP Uninstall Percent</h4>
           <echart :options="pie" style="width:100%"></echart>
         </article>
       </div>
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
-          <h4 class="title">APP Install Number</h4>
+          <h4 class="title">APP Uninstall Number</h4>
           <echart :options="line" style="width:100%"></echart>
         </article>
       </div>
@@ -410,7 +410,7 @@ export default {
     updateData () {
       client.search({
         index: 'tms-*',
-        type: 'app_install',
+        type: 'app_uninstall',
         body: {
           size: 0,
           'query': {
@@ -490,7 +490,7 @@ export default {
       var encodedUri = encodeURI(csvContent)
       var link = document.createElement('a')
       link.setAttribute('href', encodedUri)
-      link.setAttribute('download', 'tms_app_install.csv')
+      link.setAttribute('download', 'tms_app_uninstall.csv')
       document.body.appendChild(link)  // Required for FF
       link.click()
       document.body.removeChild(link)
@@ -498,7 +498,7 @@ export default {
     getList () {
       client.search({
         index: 'tms-*',
-        type: 'app_install',
+        type: 'app_uninstall',
         body: {
           size: 0,
           aggs: {
