@@ -2,12 +2,10 @@ import { lazyLoading } from './lazyLoading'
 
 export default {
   name: 'User',
-  path: '/user',
   meta: {
     icon: 'fa-user-circle-o',
     expanded: false
   },
-  component: lazyLoading('user', true),
 
   children: [
     {
@@ -17,17 +15,17 @@ export default {
     },
     {
       name: 'User Register',
-      path: 'userRegister',
+      path: '/user/userRegister',
       component: lazyLoading('user/UserRegister')
     },
     {
       name: 'User Login',
-      path: 'userLogin',
+      path: '/user/userLogin',
       component: lazyLoading('user/UserLogin')
     },
     {
       name: 'User Online',
-      path: 'userOnline',
+      path: '/user/userOnline',
       component: lazyLoading('user/UserOnline')
     }
   ]

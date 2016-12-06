@@ -2,22 +2,20 @@ import { lazyLoading } from './lazyLoading'
 
 export default {
   name: 'System',
-  path: '/system',
   meta: {
     icon: 'fa-cogs',
     expanded: false
   },
-  component: lazyLoading('system', true),
 
   children: [
     {
       name: 'System Upgrade',
-      path: 'upgrade',
+      path: '/system/upgrade',
       component: lazyLoading('system/Upgrade')
     },
     {
       name: 'System Distribution',
-      path: 'distribution',
+      path: '/system/distribution',
       component: lazyLoading('system/Distribution')
     }
   ]

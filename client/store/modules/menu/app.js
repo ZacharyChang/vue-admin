@@ -2,23 +2,26 @@ import { lazyLoading } from './lazyLoading'
 
 export default {
   name: 'APP',
-  path: '/application',
   meta: {
     icon: 'fa-android',
     expanded: false
   },
-  component: lazyLoading('application', true),
 
   children: [
     {
       name: 'APP Upgrade',
-      path: 'upgrade',
+      path: '/application/upgrade',
       component: lazyLoading('application/Upgrade')
     },
     {
       name: 'APP Install',
-      path: 'install',
+      path: '/application/install',
       component: lazyLoading('application/Install')
+    },
+    {
+      name: 'APP Uninstall',
+      path: '/application/uninstall',
+      component: lazyLoading('application/Uninstall')
     }
   ]
 }
