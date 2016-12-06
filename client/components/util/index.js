@@ -32,3 +32,11 @@ export function timezone () {
   }
   return '+' + str.slice(-5)
 }
+
+export function getDate (date) {
+  return moment(date).format('YYYY-MM-DD')
+}
+
+export function nextDay (date) {
+  return moment(date).add(1, 'd').format('YYYY-MM-DD')
+}
