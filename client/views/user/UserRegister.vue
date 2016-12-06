@@ -43,19 +43,19 @@
                   <div class="column">
                     <p class="control">
                       <label class="label">Interval:</label>
-                      <a class="button" :class="{ 'is-primary': isMonthActive }" @click="interval='month'">
+                      <a class="button" :class="{ 'is-primary': interval === 'month' }" @click="interval='month'">
                         <span class="icon is-small">
                           <i class="fa fa-align-left"></i>
                         </span>
                         <span>Month</span>
                       </a>
-                      <a class="button" :class="{ 'is-primary': isWeekActive }" @click="interval='week'">
+                      <a class="button" :class="{ 'is-primary': interval === 'week' }" @click="interval='week'">
                         <span class="icon is-small">
                           <i class="fa fa-align-center"></i>
                         </span>
                         <span>Week</span>
                       </a>
-                      <a class="button" :class="{ 'is-primary': isDayActive }" @click="interval='day'">
+                      <a class="button" :class="{ 'is-primary': interval === 'day' }" @click="interval='day'">
                         <span class="icon is-small">
                           <i class="fa fa-align-right"></i>
                         </span>
@@ -178,12 +178,24 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(item, index) in data">
+            <tr v-for="(item, index) in tableData">
               <td>{{item.name}}</td>
               <td>{{item.value}}</td>
             </tr>
             </tbody>
           </table>
+          <div style="text-align:center">
+            <el-pagination
+              small
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :current-page="currentPage"
+              :page-sizes="[10, 20, 50, 100]"
+              :page-size="currentSize"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="data.length">
+            </el-pagination>
+          </div>
         </article>
       </div>
     </div>
@@ -196,6 +208,7 @@ import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
 import client from '../../elastic'
 import notify from '../../components/notification'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
+import * as util from '../../components/util'
 
 export default {
 
@@ -218,32 +231,22 @@ export default {
         }
       },
       pieLimit: 20,
-      legendData: [],
       data: [],
-      dataArray: [],
-      compareDataArray: []
+      compareDataArray: [],
+      currentSize: 10,
+      currentPage: 1
     }
   },
 
   computed: {
-    isMonthActive () {
-      return this.interval === 'month'
+    legendData () {
+      return this.data.map(item => item.name)
     },
-    isWeekActive () {
-      return this.interval === 'week'
+    dataArray () {
+      return this.data.map(item => item.value)
     },
-    isDayActive () {
-      return this.interval === 'day'
-    },
-    timezone () {
-      var offset = new Date().getTimezoneOffset() / 60
-      var abs = Math.abs(offset)
-      var str = '0' + abs + ':00'
-      // the timezone is opposite to the offset
-      if (offset > 0) {
-        return '-' + str.slice(-5)
-      }
-      return '+' + str.slice(-5)
+    tableData () {
+      return this.data.slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
     },
     dateStart () {
       if (this.dateRange) {
@@ -386,8 +389,13 @@ export default {
   },
 
   methods: {
+    handleCurrentChange (val) {
+      this.currentPage = val
+    },
+    handleSizeChange (val) {
+      this.currentSize = val
+    },
     updateValue (val) {
-      console.log(this.data)
       this.isCompare = val
       if (val === true) {
         this.compareDateRange = null
@@ -411,8 +419,7 @@ export default {
               date_histogram: {
                 field: 'logtime',
                 interval: this.interval,
-                time_zone: this.timezone
-                // offset: new Date().getTimezoneOffset()
+                time_zone: util.timezone()
               }
             }
           }
@@ -423,19 +430,10 @@ export default {
         if (buckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
         }
-        this.legendData = []
-        this.data = []
-        this.dataArray = []
-        buckets.forEach(bucket => {
-          var obj = {}
-          var date = new Date(bucket.key).toLocaleDateString()
-          var value = bucket.doc_count
-          this.legendData.push(date)
-          this.dataArray.push(value)
-          obj['value'] = value
-          obj['name'] = date
-          this.data.push(obj)
-        })
+        this.data = buckets.map(bucket => ({
+          'name': util.formatByInterval(new Date(bucket.key), this.interval),
+          'value': bucket.doc_count
+        }))
       }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
@@ -459,7 +457,7 @@ export default {
               date_histogram: {
                 field: 'logtime',
                 interval: this.interval,
-                time_zone: this.timezone
+                time_zone: util.timezone()
               }
             }
           }

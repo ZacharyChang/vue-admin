@@ -3,23 +3,22 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent">
         <article class="tile is-child box">
+          <h1 class="title">Conditions</h1>
           <div class="block is-flex">
             <collapse>
-              <collapse-item title="Conditions">
-                <div class="columns">
-                  <div class="column is-3">
-                    <p class="control">
-                      <label class="label">Date:</label>
-                      <el-date-picker
-                        v-model="date"
-                        type="date"
-                        placeholder="Select Time Range..."
-                        style="width:80%">
-                      </el-date-picker>
-                    </p>
-                  </div>
+              <div class="columns">
+                <div class="column is-3">
+                  <p class="control">
+                    <label class="label">Date:</label>
+                    <el-date-picker
+                      v-model="date"
+                      type="date"
+                      placeholder="Select Time Range..."
+                      style="width:80%">
+                    </el-date-picker>
+                  </p>
                 </div>
-              </collapse-item>
+              </div>
             </collapse>
           </div>
         </article>
@@ -55,14 +54,14 @@
             </tr>
             </thead>
             <tbody>
-            <template v-for="item in data">
-              <td :rowspan="item.children.length + 1" style="vertical-align:middle">{{item.name}}</td>
-              <td :rowspan="item.children.length + 1" style="vertical-align:middle">{{item.value}}</td>
-              <tr v-for="(version, index) in item.children">
-                <td>{{version.name}}</td>
-                <td>{{version.value}}</td>
-              </tr>
-            </template>
+              <template v-for="item in data">
+                <td :rowspan="item.children.length + 1" style="vertical-align:middle">{{item.name}}</td>
+                <td :rowspan="item.children.length + 1" style="vertical-align:middle">{{item.value}}</td>
+                <tr v-for="(version, index) in item.children">
+                  <td>{{version.name}}</td>
+                  <td>{{version.value}}</td>
+                </tr>
+              </template>
             </tbody>
           </table>
         </article>
@@ -113,18 +112,6 @@ export default {
     },
     legendData () {
       return this.data.map(item => item.name)
-    },
-    percentOption () {
-      if (this.model === '_all') {
-        return 'model.keyword'
-      }
-      return 'upgrade_version.keyword'
-    },
-    percentLegend () {
-      if (this.model === '_all') {
-        return 'Model'
-      }
-      return 'Upgrade Version'
     },
     treemap () {
       return {
@@ -238,7 +225,7 @@ export default {
       var csvContent = 'data:text/csv;charset=utf-8,'
       data.forEach(model =>
         model.children.forEach(version =>
-          csvContent += model.name + ',' + model.value + ',' + version.name + ',' + version.value + '\r\n'
+          (csvContent += model.name + ',' + model.value + ',' + version.name + ',' + version.value + '\r\n')
         )
       )
       var encodedUri = encodeURI(csvContent)
@@ -248,7 +235,7 @@ export default {
       document.body.appendChild(link)  // Required for FF
       link.click()
       document.body.removeChild(link)
-    },
+    }
   }
 }
 </script>

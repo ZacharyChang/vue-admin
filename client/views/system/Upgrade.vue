@@ -48,12 +48,6 @@
                         </span>
                         <span>Hour</span>
                       </a>
-                      <a class="button" :class="{ 'is-primary': this.interval === 'minute' }" @click="interval='minute'">
-                        <span class="icon is-small">
-                          <i class="fa fa-align-right"></i>
-                        </span>
-                        <span>Minute</span>
-                      </a>
                     </p>
                   </div>
                   <div class="column">
@@ -173,7 +167,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(item, index) in data">
+            <tr v-for="(item, index) in tableData">
               <td>{{item.name}}</td>
               <td>{{item.success}}</td>
               <td>{{item.fail}}</td>
@@ -181,6 +175,18 @@
             </tr>
             </tbody>
           </table>
+          <div style="text-align:center">
+            <el-pagination
+              small
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :current-page="currentPage"
+              :page-sizes="[10, 20, 50, 100]"
+              :page-size="currentSize"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="data.length">
+            </el-pagination>
+          </div>
         </article>
       </div>
     </div>
@@ -223,7 +229,9 @@ export default {
       manufacturerList: [],
       modelList: [],
       manufacturer: '_all',
-      model: '_all'
+      model: '_all',
+      currentSize: 10,
+      currentPage: 1
     }
   },
 
@@ -239,6 +247,9 @@ export default {
     },
     failData () {
       return this.data.map(item => item.fail)
+    },
+    tableData () {
+      return this.data.slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
     },
     dateStart () {
       if (this.dateRange) {
@@ -417,6 +428,12 @@ export default {
   },
 
   methods: {
+    handleCurrentChange (val) {
+      this.currentPage = val
+    },
+    handleSizeChange (val) {
+      this.currentSize = val
+    },
     updateData () {
       client.search({
         index: 'tms-*',

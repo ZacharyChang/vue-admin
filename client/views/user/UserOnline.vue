@@ -93,36 +93,15 @@
           <nav class="level">
             <div class="level-item has-text-centered">
               <p class="heading">Maximum</p>
-              <p v-if="isCompare" class="title">
-                {{max}}
-                <i v-if="compareMax > max" aria-hidden="true" class="greater fa fa-long-arrow-up"></i>
-                <i v-if="compareMax < max" aria-hidden="true" class="lesser fa fa-long-arrow-down"></i>
-                <i v-if="compareMax == max" aria-hidden="true" class="equal fa fa-exchange"></i>
-                {{compareMax}}
-              </p>
-              <p v-else class="title">{{max}}</p>
+              <p class="title">{{max}}</p>
             </div>
             <div class="level-item has-text-centered">
               <p class="heading">Minimum</p>
-              <p v-if="isCompare" class="title">
-                {{min}}
-                <i v-if="compareMin > min" aria-hidden="true" class="greater fa fa-long-arrow-up"></i>
-                <i v-if="compareMin < min" aria-hidden="true" class="lesser fa fa-long-arrow-down"></i>
-                <i v-if="compareMin == min" aria-hidden="true" class="equal fa fa-exchange"></i>
-                {{compareMin}}
-              </p>
-              <p v-else class="title">{{min}}</p>
+              <p class="title">{{min}}</p>
             </div>
             <div class="level-item has-text-centered">
               <p class="heading">Average</p>
-              <p v-if="isCompare" class="title">
-                {{avg}}
-                <i v-if="compareAvg > avg" aria-hidden="true" class="greater fa fa-long-arrow-up"></i>
-                <i v-if="compareAvg < avg" aria-hidden="true" class="lesser fa fa-long-arrow-down"></i>
-                <i v-if="compareAvg == avg" aria-hidden="true" class="equal fa fa-exchange"></i>
-                {{compareAvg}}
-              </p>
-              <p v-else class="title">{{avg}}</p>
+              <p class="title">{{avg}}</p>
             </div>
           </nav>
         </article>
@@ -155,13 +134,25 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(item, index) in data">
-              <td>{{item.name}}</td>
-              <td>{{item.online}}</td>
-              <td>{{item.offline}}</td>
-            </tr>
+              <tr v-for="(item, index) in tableData">
+                <td>{{item.name}}</td>
+                <td>{{item.online}}</td>
+                <td>{{item.offline}}</td>
+              </tr>
             </tbody>
           </table>
+          <div style="text-align:center">
+            <el-pagination
+              small
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :current-page="currentPage"
+              :page-sizes="[10, 20, 50, 100]"
+              :page-size="currentSize"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="data.length">
+            </el-pagination>
+          </div>
         </article>
       </div>
     </div>
@@ -200,7 +191,9 @@ export default {
       manufacturerList: ['_all'],
       modelList: ['_all'],
       manufacturer: '_all',
-      model: '_all'
+      model: '_all',
+      currentSize: 10,
+      currentPage: 1
     }
   },
 
@@ -213,6 +206,9 @@ export default {
     },
     offlineData () {
       return this.data.map(item => item.offline)
+    },
+    tableData () {
+      return this.data.slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
     },
     dateStart () {
       if (this.dateRange) {
@@ -330,11 +326,11 @@ export default {
   },
 
   methods: {
-    updateValue (val) {
-      this.isCompare = val
-      if (val === true) {
-        this.compareDateRange = null
-      }
+    handleCurrentChange (val) {
+      this.currentPage = val
+    },
+    handleSizeChange (val) {
+      this.currentSize = val
     },
     updateData () {
       client.search({
