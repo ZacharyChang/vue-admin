@@ -100,19 +100,31 @@
       </div>
     </div>
     <div class="tile is-ancestor">
-      <div class="tile is-parent is-6">
+      <div class="tile is-parent">
         <article class="tile is-child box">
-          <h4 class="title">APP Use Percent</h4>
-          <echart :options="pie" style="width:100%"></echart>
-        </article>
-      </div>
-      <div class="tile is-parent is-6">
-        <article class="tile is-child box">
-          <h4 class="title">APP Use Count</h4>
-          <echart :options="line" style="width:100%"></echart>
+          <tabs type="toggle" size="medium" :is-fullwidth="true" animation="slide">
+            <tab-pane label="Summary" style="width:100%">
+              <div class="tile is-ancestor box">
+                <div class="tile is-parent is-6">
+                  <article class="tile is-child box">
+                    <h4 class="title">APP Use Percent</h4>
+                    <echart :options="pie" style="width:100%"></echart>
+                  </article>
+                </div>
+                <div class="tile is-parent is-6">
+                  <article class="tile is-child box">
+                    <h4 class="title">APP Use Count</h4>
+                    <echart :options="line" style="width:100%"></echart>
+                  </article>
+                </div>
+              </div>
+            </tab-pane>
+            <tab-pane label="Time">Music Tab</tab-pane>
+          </tabs>
         </article>
       </div>
     </div>
+
     <div class="tile is-ancestor">
       <div class="tile is-parent">
         <article class="tile is-child box">
