@@ -102,7 +102,7 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent">
         <article class="tile is-child box">
-          <tabs type="toggle" size="medium" :is-fullwidth="true" animation="slide">
+          <tabs type="toggle" size="medium" :is-fullwidth="true" :only-fade="false" animation="slide">
             <tab-pane label="Summary" style="width:100%">
               <div class="tile is-ancestor box">
                 <div class="tile is-parent is-6">
@@ -119,7 +119,16 @@
                 </div>
               </div>
             </tab-pane>
-            <tab-pane label="Time">Music Tab</tab-pane>
+            <tab-pane label="Time" style="width:100%" v-show="isShow">
+              <div class="tile is-ancestor box">
+                <div class="tile is-parent is-12">
+                  <article class="tile is-child box">
+                    <h4 class="title">APP Use Duration</h4>
+                    <echart :options="scatter" style="width:100%"></echart>
+                  </article>
+                </div>
+              </div>
+            </tab-pane>
           </tabs>
         </article>
       </div>
@@ -196,9 +205,12 @@ export default {
           return time.getTime() > Date.now()
         }
       },
+      isShow: true,  // to hide the tab after all elements mounted
       data: [],
       appData: [],
       versionData: [],
+      appDurationData: [],
+      appNumberData: [],
       isCompare: false,
       compareData: [],
       appList: [],
@@ -231,6 +243,9 @@ export default {
         end.setDate(end.getDate() + 1)
         return end
       }
+    },
+    maxNumber () {
+      return Math.max.apply(null, this.appNumberData)
     },
     sum () {
       return this.countData.reduce((a, b) => a + b, 0)
@@ -351,6 +366,63 @@ export default {
           }
         ]
       }
+    },
+    scatterSeries () {
+      return this.appDurationData.map(item => ({
+        name: item[0][3], // the third element is the app name
+        data: item,
+        type: 'scatter',
+        symbolSize: data => Math.pow(data[2] / this.maxNumber, 1/3)*60,
+        label: {
+          emphasis: {
+            show: true,
+            formatter: function (param) {
+                return param.data[3] // APP Name
+            },
+            position: 'top'
+          }
+        },
+        itemStyle: {
+            normal: {
+                shadowBlur: 10,
+                shadowColor: 'rgba(25, 100, 150, 0.5)',
+                shadowOffsetY: 5
+            }
+        }
+      }))
+    },
+    scatter () {
+      return {
+        legend: {
+            right: 10,
+            data: this.appData.map(item => item.name)  // the array of app names
+        },
+        tooltip: {
+            padding: 10,
+            backgroundColor: '#222',
+            borderColor: '#777',
+            borderWidth: 1,
+            formatter: param => (
+              'Date: ' + param.data[0]
+              + '<br/>APP: ' + param.data[3]
+              + '<br/>Number: ' + param.data[2]
+              + '<br/>Average Time: ' + param.data[1] + ' seconds'
+            )
+        },
+        xAxis: {
+            type: 'category',
+              data: this.legendData  // time line
+        },
+        yAxis: {
+            splitLine: {
+                lineStyle: {
+                    type: 'dashed'
+                }
+            },
+            scale: true
+        },
+        series: this.scatterSeries
+      }
     }
   },
 
@@ -387,6 +459,7 @@ export default {
   mounted: function () {
     this.getList()
     this.updateData()
+    this.isShow = false
   },
 
   methods: {
@@ -435,6 +508,22 @@ export default {
               terms: {
                 field: 'app_name.keyword',
                 size: 10
+              },
+              aggs: {
+                aggs_date: {
+                  date_histogram: {
+                    field: 'start_time',
+                    interval: this.interval,
+                    time_zone: util.timezone()
+                  },
+                  aggs: {
+                    aggs_avg: {
+                      avg: {
+                        field: 'duration'
+                      }
+                    }
+                  }
+                }
               }
             },
             aggs_version: {
@@ -452,7 +541,7 @@ export default {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
         }
         this.data = dateBuckets.map(bucket => ({
-          'name': util.formatByInterval(new Date(bucket.key), this.interval),
+          'name': util.formatByInterval(bucket.key, this.interval),
           'count': bucket.doc_count
         }))
         this.appData = body.aggregations.aggs_app.buckets.map(bucket => ({
@@ -463,6 +552,16 @@ export default {
           'name': bucket.key,
           'value': bucket.doc_count
         }))
+        this.appDurationData = []
+        this.appNumberData = []
+        body.aggregations.aggs_app.buckets.forEach(app => {
+          let temp = []
+          app.aggs_date.buckets.forEach(date => {
+            temp.push([util.formatByInterval(date.key, this.interval), date.aggs_avg.value ? parseInt(date.aggs_avg.value) : 0, date.doc_count, app.key])
+            this.appNumberData.push(date.doc_count)
+          })
+          this.appDurationData.push(temp)
+        })
       }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)
