@@ -149,12 +149,16 @@
             <tr>
               <th>Date</th>
               <th>Count</th>
+              <th>Sum Use Time</th>
+              <th>Average Use Time</th>
             </tr>
             </thead>
             <tbody>
               <tr v-for="(item, index) in tableData">
                 <td>{{item.name}}</td>
                 <td>{{item.count}}</td>
+                <td>{{item.sum}}</td>
+                <td>{{item.avg}}</td>
               </tr>
             </tbody>
           </table>
@@ -230,7 +234,7 @@ export default {
       return this.data.map(item => item.count)
     },
     tableData () {
-      return this.data.slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
+      return this.data.slice(0).reverse().slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
     },
     dateStart () {
       if (this.dateRange) {
@@ -372,54 +376,55 @@ export default {
         name: item[0][3], // the third element is the app name
         data: item,
         type: 'scatter',
-        symbolSize: data => Math.pow(data[2] / this.maxNumber, 1/3)*60,
+        symbolSize: data => Math.pow(data[2] / this.maxNumber, 1 / 3) * 60,
         label: {
           emphasis: {
             show: true,
             formatter: function (param) {
-                return param.data[3] // APP Name
+              return param.data[3] // APP Name
             },
             position: 'top'
           }
         },
         itemStyle: {
-            normal: {
-                shadowBlur: 10,
-                shadowColor: 'rgba(25, 100, 150, 0.5)',
-                shadowOffsetY: 5
-            }
+          normal: {
+            shadowBlur: 10,
+            shadowColor: 'rgba(25, 100, 150, 0.5)',
+            shadowOffsetY: 5
+          }
         }
       }))
     },
     scatter () {
       return {
         legend: {
-            right: 10,
-            data: this.appData.map(item => item.name)  // the array of app names
+          right: 10,
+          data: this.appData.map(item => item.name)  // the array of app names
         },
         tooltip: {
-            padding: 10,
-            backgroundColor: '#222',
-            borderColor: '#777',
-            borderWidth: 1,
-            formatter: param => (
-              'Date: ' + param.data[0]
-              + '<br/>APP: ' + param.data[3]
-              + '<br/>Number: ' + param.data[2]
-              + '<br/>Average Time: ' + param.data[1] + ' seconds'
-            )
+          padding: 10,
+          backgroundColor: '#222',
+          borderColor: '#777',
+          borderWidth: 1,
+          formatter: param => (
+            'Date: ' + param.data[0] +
+            '<br/>APP: ' + param.data[3] +
+            '<br/>Number: ' + param.data[2] +
+            '<br/>Average Time: ' + util.humanize(param.data[1])
+          )
         },
         xAxis: {
-            type: 'category',
-              data: this.legendData  // time line
+          type: 'category',
+          data: this.legendData  // time line
         },
         yAxis: {
-            splitLine: {
-                lineStyle: {
-                    type: 'dashed'
-                }
-            },
-            scale: true
+          splitLine: {
+            lineStyle: {
+              type: 'dashed'
+            }
+          },
+          scale: true,
+          name: 'Seconds'
         },
         series: this.scatterSeries
       }
@@ -488,18 +493,14 @@ export default {
                 time_zone: util.timezone()
               },
               aggs: {
-                aggs_success: {
-                  filter: {
-                    term: {
-                      result: 'success'
-                    }
+                aggs_sum_duration: {
+                  sum: {
+                    field: 'duration'
                   }
                 },
-                aggs_fail: {
-                  filter: {
-                    term: {
-                      result: 'fail'
-                    }
+                aggs_avg_duration: {
+                  avg: {
+                    field: 'duration'
                   }
                 }
               }
@@ -542,7 +543,9 @@ export default {
         }
         this.data = dateBuckets.map(bucket => ({
           'name': util.formatByInterval(bucket.key, this.interval),
-          'count': bucket.doc_count
+          'count': bucket.doc_count,
+          'sum': util.humanize(bucket.aggs_sum_duration.value),
+          'avg': util.humanize(bucket.aggs_avg_duration.value)
         }))
         this.appData = body.aggregations.aggs_app.buckets.map(bucket => ({
           'name': bucket.key,
@@ -571,7 +574,7 @@ export default {
       var data = this.data
       var csvContent = 'data:text/csv;charset=utf-8,'
       data.forEach(function (value, index) {
-        csvContent += value.name + ',' + value.success + ',' + value.fail + ',' + value.count + '\r\n'
+        csvContent += value.name + ',' + value.count + ',' + value.sum + ',' + value.avg + '\r\n'
       })
       var encodedUri = encodeURI(csvContent)
       var link = document.createElement('a')

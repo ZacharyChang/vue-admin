@@ -113,6 +113,9 @@ export default {
     legendData () {
       return this.data.map(item => item.name)
     },
+    tableData () {
+      return this.data.slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
+    },
     treemap () {
       return {
         tooltip: {},
@@ -169,6 +172,12 @@ export default {
   },
 
   methods: {
+    handleCurrentChange (val) {
+      this.currentPage = val
+    },
+    handleSizeChange (val) {
+      this.currentSize = val
+    },
     updateData () {
       client.search({
         index: 'tms-*',
