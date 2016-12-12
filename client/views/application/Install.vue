@@ -216,7 +216,7 @@ export default {
       return this.data.map(item => item.fail)
     },
     tableData () {
-      return this.data.slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
+      return this.data.slice(0).reverse().slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
     },
     dateStart () {
       if (this.dateRange) {

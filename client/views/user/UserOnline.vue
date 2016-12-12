@@ -18,48 +18,45 @@
                     </el-date-picker>
                   </p>
                 </div>
-              </div>
-              <collapse-item title="More.." selected>
-                <div class="columns">
-                  <div class="column is-6">
-                    <p class="control">
-                      <label class="label">Interval:</label>
-                      <a class="button" :class="{ 'is-primary': this.interval === 'month' }" @click="interval='month'">
+                <div class="column is-4">
+                  <p class="control">
+                    <label class="label">Interval:</label>
+                    <a class="button" :class="{ 'is-primary': this.interval === 'month' }" @click="interval='month'">
                         <span class="icon is-small">
                           <i class="fa fa-align-left"></i>
                         </span>
-                        <span>Month</span>
-                      </a>
-                      <a class="button" :class="{ 'is-primary': this.interval === 'week' }" @click="interval='week'">
+                      <span>Month</span>
+                    </a>
+                    <a class="button" :class="{ 'is-primary': this.interval === 'week' }" @click="interval='week'">
                         <span class="icon is-small">
                           <i class="fa fa-align-center"></i>
                         </span>
-                        <span>Week</span>
-                      </a>
-                      <a class="button" :class="{ 'is-primary': this.interval === 'day' }" @click="interval='day'">
+                      <span>Week</span>
+                    </a>
+                    <a class="button" :class="{ 'is-primary': this.interval === 'day' }" @click="interval='day'">
                         <span class="icon is-small">
                           <i class="fa fa-align-right"></i>
                         </span>
-                        <span>Day</span>
-                      </a>
-                      <a class="button" :class="{ 'is-primary': this.interval === 'hour' }" @click="interval='hour'">
+                      <span>Day</span>
+                    </a>
+                    <a class="button" :class="{ 'is-primary': this.interval === 'hour' }" @click="interval='hour'">
                         <span class="icon is-small">
                           <i class="fa fa-align-right"></i>
                         </span>
-                        <span>Hour</span>
-                      </a>
-                      <a class="button" :class="{ 'is-primary': this.interval === 'minute' }" @click="interval='minute'">
+                      <span>Hour</span>
+                    </a>
+                    <a class="button" :class="{ 'is-primary': this.interval === 'minute' }" @click="interval='minute'">
                         <span class="icon is-small">
                           <i class="fa fa-align-right"></i>
                         </span>
-                        <span>Minute</span>
-                      </a>
-                    </p>
-                  </div>
-                  <div class="column">
-                    <p class="control">
-                      <label class="label">Manufacturer:</label>
-                      <span class="select">
+                      <span>Minute</span>
+                    </a>
+                  </p>
+                </div>
+                <div class="column">
+                  <p class="control">
+                    <label class="label">Manufacturer:</label>
+                    <span class="select">
                         <select v-model="manufacturer">
                           <option value="_all">All</option>
                           <option v-for="(item, index) in manufacturerList">
@@ -67,21 +64,20 @@
                           </option>
                         </select>
                       </span>
-                    </p>
-                  </div>
-                  <div class="column">
-                    <p class="control">
-                      <label class="label">Model:</label>
-                      <span class="select">
+                  </p>
+                </div>
+                <div class="column">
+                  <p class="control">
+                    <label class="label">Model:</label>
+                    <span class="select">
                         <select v-model="model">
                           <option value="_all">All</option>
                           <option v-for="(item, index) in modelList">{{item}}</option>
                         </select>
                       </span>
-                    </p>
-                  </div>
+                  </p>
                 </div>
-              </collapse-item>
+              </div>
             </collapse>
           </div>
         </article>
@@ -208,7 +204,7 @@ export default {
       return this.data.map(item => item.offline)
     },
     tableData () {
-      return this.data.slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
+      return this.data.slice(0).reverse().slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
     },
     dateStart () {
       if (this.dateRange) {
@@ -275,7 +271,7 @@ export default {
             name: 'Online',
             type: 'line',
             data: this.onlineData,
-            stack: 'All',
+            // stack: 'All',
             itemStyle: {
               normal: {
                 color: '#1fc8db'
@@ -291,7 +287,7 @@ export default {
             name: 'Offline',
             type: 'line',
             data: this.offlineData,
-            stack: 'All',
+            // stack: 'All',
             itemStyle: {
               normal: {
                 color: '#ff3860'
@@ -344,7 +340,7 @@ export default {
                 {
                   'range': {
                     '@timestamp': {
-                      'gte': this.dateStart,
+                      'gte': 'now/d',
                       'lt': this.dateEnd
                     }
                   }
@@ -392,8 +388,8 @@ export default {
         }
         this.data = buckets.map(bucket => ({
           'name': util.formatByInterval(new Date(bucket.key), this.interval),
-          'online': parseInt(bucket.aggs_online.value),
-          'offline': parseInt(bucket.aggs_offline.value)
+          'online': bucket.aggs_online.value ? parseInt(bucket.aggs_online.value) : 0,
+          'offline': bucket.aggs_offline.value ? parseInt(bucket.aggs_offline.value) : 0
         }))
       }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')

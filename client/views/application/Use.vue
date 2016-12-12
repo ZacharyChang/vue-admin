@@ -275,7 +275,7 @@ export default {
     condition () {
       var condition = [{
         'range': {
-          '@timestamp': {
+          'start_time': {
             'gte': this.dateStart,
             'lt': this.dateEnd
           }

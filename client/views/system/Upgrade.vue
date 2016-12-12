@@ -249,7 +249,7 @@ export default {
       return this.data.map(item => item.fail)
     },
     tableData () {
-      return this.data.slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
+      return this.data.slice(0).reverse().slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
     },
     dateStart () {
       if (this.dateRange) {
@@ -377,7 +377,7 @@ export default {
             name: 'Success',
             type: 'line',
             data: this.successData,
-            stack: 'All',
+            // stack: 'All',
             itemStyle: {
               normal: {
                 color: '#1fc8db'
@@ -393,7 +393,7 @@ export default {
             name: 'Fail',
             type: 'line',
             data: this.failData,
-            stack: 'All',
+            // stack: 'All',
             itemStyle: {
               normal: {
                 color: '#ff3860'

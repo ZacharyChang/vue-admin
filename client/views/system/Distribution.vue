@@ -114,7 +114,7 @@ export default {
       return this.data.map(item => item.name)
     },
     tableData () {
-      return this.data.slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
+      return this.data.slice(0).reverse().slice((this.currentPage - 1) * this.currentSize, this.currentPage * this.currentSize)
     },
     treemap () {
       return {
