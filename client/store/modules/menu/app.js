@@ -22,6 +22,16 @@ export default {
       name: 'APP Uninstall',
       path: '/application/uninstall',
       component: lazyLoading('application/Uninstall')
+    },
+    {
+      name: 'APP Use',
+      path: '/application/use',
+      component: lazyLoading('application/Use')
+    },
+    {
+      name: 'APP Distribution',
+      path: '/application/distribution',
+      component: lazyLoading('application/Distribution')
     }
   ]
 }

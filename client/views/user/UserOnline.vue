@@ -45,12 +45,6 @@
                         </span>
                       <span>Hour</span>
                     </a>
-                    <a class="button" :class="{ 'is-primary': this.interval === 'minute' }" @click="interval='minute'">
-                        <span class="icon is-small">
-                          <i class="fa fa-align-right"></i>
-                        </span>
-                      <span>Minute</span>
-                    </a>
                   </p>
                 </div>
                 <div class="column">
@@ -107,7 +101,7 @@
       <div class="tile is-parent is-12">
         <article class="tile is-child box">
           <h4 class="title">User Online Number</h4>
-          <echart :options="line" style="width:100%"></echart>
+          <echart :options="line" class="fullwidth"></echart>
         </article>
       </div>
     </div>
@@ -145,7 +139,7 @@
               :current-page="currentPage"
               :page-sizes="[10, 20, 50, 100]"
               :page-size="currentSize"
-              layout="total, sizes, prev, pager, next, jumper"
+              :layout="paginationLayout"
               :total="data.length">
             </el-pagination>
           </div>
@@ -241,6 +235,9 @@ export default {
         return parseInt(this.sum / (this.onlineData.length))
       }
       return 0
+    },
+    paginationLayout () {
+      return util.paginationLayout()
     },
     line () {
       return {
@@ -468,7 +465,6 @@ export default {
 .js-plotly-plot {
   max-width: 100%;
 }
-
 .slide-fade-enter-active {
   transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
 }
@@ -490,5 +486,8 @@ export default {
 }
 .equal {
   color: #3273dc
+}
+.fullwidth {
+  width: 100%
 }
 </style>

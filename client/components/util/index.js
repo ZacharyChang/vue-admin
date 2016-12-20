@@ -40,3 +40,21 @@ export function getDate (date) {
 export function nextDay (date) {
   return moment(date).add(1, 'd').format('YYYY-MM-DD')
 }
+
+export function humanize (date) {
+  if (!date) {
+    return 'no time'
+  }
+  date = parseInt(date)
+  if (date < 60) {
+    return date + ' seconds'
+  }
+  return moment.duration(date, 'seconds').humanize()
+}
+
+export function paginationLayout () {
+  if (window.matchMedia('(max-width:768px)').matches) {
+    return 'prev, pager, next'
+  }
+  return 'total, sizes, prev, pager, next, jumper'
+}

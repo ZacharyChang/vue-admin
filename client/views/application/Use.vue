@@ -48,18 +48,18 @@
                   </p>
                 </div>
                 <div class="column">
-                  <p class="control">
+                  <p class="control el-input-bottom">
                     <label class="label">APP Name:</label>
                     <el-autocomplete
                       class="inline-input"
                       v-model="appName"
                       :fetch-suggestions="filterApp"
-                      style="position:fixed;z-index:2"
+                      style="position:fixed;z-index:3"
                     ></el-autocomplete>
                   </p>
                 </div>
                 <div class="column">
-                  <p class="control">
+                  <p class="control el-input-bottom">
                     <label class="label">Package Name:</label>
                     <el-autocomplete
                       class="inline-input"
@@ -108,13 +108,13 @@
                 <div class="tile is-parent is-6">
                   <article class="tile is-child box">
                     <h4 class="title">APP Use Percent</h4>
-                    <echart :options="pie" style="width:100%"></echart>
+                    <echart :options="pie" class="fullwidth"></echart>
                   </article>
                 </div>
                 <div class="tile is-parent is-6">
                   <article class="tile is-child box">
                     <h4 class="title">APP Use Count</h4>
-                    <echart :options="line" style="width:100%"></echart>
+                    <echart :options="line" class="fullwidth"></echart>
                   </article>
                 </div>
               </div>
@@ -170,7 +170,7 @@
               :current-page="currentPage"
               :page-sizes="[10, 20, 50, 100]"
               :page-size="currentSize"
-              layout="total, sizes, prev, pager, next, jumper"
+              :layout="paginationLayout"
               :total="data.length">
             </el-pagination>
           </div>
@@ -271,6 +271,9 @@ export default {
         return parseInt(this.sum / (this.countData.length))
       }
       return 0
+    },
+    paginationLayout () {
+      return util.paginationLayout()
     },
     condition () {
       var condition = [{
@@ -508,7 +511,7 @@ export default {
             aggs_app: {
               terms: {
                 field: 'app_name.keyword',
-                size: 10
+                size: 5
               },
               aggs: {
                 aggs_date: {
@@ -530,7 +533,7 @@ export default {
             aggs_version: {
               terms: {
                 field: 'version_name.keyword',
-                size: 10
+                size: 5
               }
             }
           }
@@ -673,5 +676,14 @@ export default {
 }
 .equal {
   color: #3273dc
+}
+.button {
+  margin: 5px 0 0
+}
+.el-input-bottom {
+  padding:0 0 36px 0
+}
+.fullwidth {
+  width: 100%
 }
 </style>

@@ -156,13 +156,13 @@
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
           <h4 class="title">User Register Percent</h4>
-          <echart :options="pie"></echart>
+          <echart :options="pie" class="fullwidth"></echart>
         </article>
       </div>
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
           <h4 class="title">User Register Count</h4>
-          <echart :options="line"></echart>
+          <echart :options="line" class="fullwidth"></echart>
         </article>
       </div>
     </div>
@@ -192,7 +192,7 @@
               :current-page="currentPage"
               :page-sizes="[10, 20, 50, 100]"
               :page-size="currentSize"
-              layout="total, sizes, prev, pager, next, jumper"
+              :layout="paginationLayout"
               :total="data.length">
             </el-pagination>
           </div>
@@ -319,6 +319,9 @@ export default {
         return parseInt(this.compareSum / (this.compareDataArray.length))
       }
       return 0
+    },
+    paginationLayout () {
+      return util.paginationLayout()
     },
     pie () {
       return {
@@ -485,7 +488,6 @@ export default {
 .js-plotly-plot {
   max-width: 100%;
 }
-
 .slide-fade-enter-active {
   transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
 }
@@ -507,5 +509,8 @@ export default {
 }
 .equal {
   color: #3273dc
+}
+.fullwidth {
+  width: 100%
 }
 </style>

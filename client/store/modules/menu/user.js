@@ -8,11 +8,11 @@ export default {
   },
 
   children: [
-    {
-      name: 'User Number',
-      path: 'userNumber',
-      component: lazyLoading('user/UserNumber')
-    },
+    // {
+    //   name: 'User Number',
+    //   path: '/user/userNumber',
+    //   component: lazyLoading('user/UserNumber')
+    // },
     {
       name: 'User Register',
       path: '/user/userRegister',
