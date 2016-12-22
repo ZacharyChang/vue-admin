@@ -67,8 +67,11 @@
                     <p class="control">
                       <label class="label">Manufacturer:</label>
                       <span class="select">
-                        <select>
-                          <option>All</option>
+                        <select v-model="manufacturer">
+                          <option value="_all">All</option>
+                          <option v-for="(item, index) in manufacturerList">
+                            {{item}}
+                          </option>
                         </select>
                       </span>
                     </p>
@@ -77,8 +80,9 @@
                     <p class="control">
                       <label class="label">Model:</label>
                       <span class="select">
-                        <select>
-                          <option>All</option>
+                        <select v-model="model">
+                          <option value="_all">All</option>
+                          <option v-for="(item, index) in modelList">{{item}}</option>
                         </select>
                       </span>
                     </p>
@@ -87,8 +91,9 @@
                     <p class="control">
                       <label class="label">Version:</label>
                       <span class="select">
-                        <select>
-                          <option>All</option>
+                        <select v-model="version">
+                          <option value="_all">All</option>
+                          <option v-for="(item, index) in versionList">{{item}}</option>
                         </select>
                       </span>
                     </p>
@@ -225,6 +230,12 @@ export default {
       dateRange: null,
       compareDateRange: null,
       interval: 'day',
+      manufacturerList: [],
+      modelList: [],
+      versionList: [],
+      manufacturer: '_all',
+      model: '_all',
+      version: '_all',
       pickerOptions: {
         disabledDate (time) {
           return time.getTime() > Date.now()
@@ -323,6 +334,32 @@ export default {
     paginationLayout () {
       return util.paginationLayout()
     },
+    condition () {
+      var condition = [{
+        'range': {
+          '@timestamp': {
+            'gte': this.dateStart,
+            'lt': this.dateEnd
+          }
+        }
+      }]
+      if (this.manufacturer !== '_all') {
+        condition.push({'term': {
+          'manufacturer.keyword': this.manufacturer
+        }})
+      }
+      if (this.model !== '_all') {
+        condition.push({'term': {
+          'model.keyword': this.model
+        }})
+      }
+      if (this.version !== '_all') {
+        condition.push({'term': {
+          'version.keyword': this.version
+        }})
+      }
+      return condition
+    },
     pie () {
       return {
         tooltip: {
@@ -388,6 +425,7 @@ export default {
   },
 
   mounted: function () {
+    this.getList()
     this.updateData()
   },
 
@@ -407,20 +445,18 @@ export default {
     updateData () {
       client.search({
         index: 'tms-*',
+        type: 'login',
         body: {
           size: 0,
-          'query': {
-            'range': {
-              'logtime': {
-                'gte': this.dateStart,
-                'lt': this.dateEnd
-              }
+          query: {
+            bool: {
+              must: this.condition
             }
           },
           aggs: {
             aggs_date: {
               date_histogram: {
-                field: 'logtime',
+                field: '@timestamp',
                 interval: this.interval,
                 time_zone: util.timezone()
               }
@@ -445,20 +481,18 @@ export default {
     updateCompareData () {
       client.search({
         index: 'tms-*',
+        type: 'login',
         body: {
           size: 0,
-          'query': {
-            'range': {
-              'logtime': {
-                'gte': this.compareDateStart,
-                'lt': this.compareDateEnd
-              }
+          query: {
+            bool: {
+              must: this.condition
             }
           },
           aggs: {
             aggs_date: {
               date_histogram: {
-                field: 'logtime',
+                field: '@timestamp',
                 interval: this.interval,
                 time_zone: util.timezone()
               }
@@ -479,6 +513,48 @@ export default {
         notify('danger', 'Fail', 'Can not get data from server!')
         console.trace(error.message)
       })
+    },
+    getList () {
+      var that = this   // 保存Vue对象的指针，否则子函数中无法获取
+      client.search({
+        index: 'tms-*',
+        type: 'login',
+        body: {
+          size: 0,
+          aggs: {
+            aggs_model: {
+              terms: {
+                field: 'model.keyword',
+                order: {
+                  _term: 'asc'
+                }
+              }
+            },
+            aggs_manufacturer: {
+              terms: {
+                field: 'manufacturer.keyword',
+                order: {
+                  _term: 'asc'
+                }
+              }
+            },
+            aggs_version: {
+              terms: {
+                field: 'version.keyword',
+                order: {
+                  _term: 'asc'
+                }
+              }
+            }
+          }
+        }
+      }).then(body => {
+        that.manufacturerList = body.aggregations.aggs_manufacturer.buckets.map(item => item.key)
+        that.modelList = body.aggregations.aggs_model.buckets.map(item => item.key)
+      }, error => {
+        notify('danger', 'Fail', 'Can not receive data from server!')
+        console.trace(error.message)
+      })
     }
   }
 }
@@ -488,6 +564,7 @@ export default {
 .js-plotly-plot {
   max-width: 100%;
 }
+
 .slide-fade-enter-active {
   transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
 }
