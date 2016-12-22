@@ -1,10 +1,10 @@
 import * as types from '../../mutation-types'
 import { lazyLoading } from './lazyLoading'
-import charts from './charts'
-import uifeatures from './uifeatures'
-import components from './components'
-import tables from './tables'
-import user from './user'
+// import charts from './charts'
+// import uifeatures from './uifeatures'
+// import components from './components'
+// import tables from './tables'
+import device from './device'
 import system from './system'
 import app from './app'
 
@@ -22,11 +22,11 @@ const state = {
       },
       component: lazyLoading('dashboard', true)
     },
-    charts,
-    uifeatures,
-    components,
-    tables,
-    user,
+    // charts,
+    // uifeatures,
+    // components,
+    // tables,
+    device,
     system,
     app
   ]
