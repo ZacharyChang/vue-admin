@@ -100,7 +100,7 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent is-12">
         <article class="tile is-child box">
-          <h4 class="title">User Online Number</h4>
+          <h4 class="title">Device Online Number</h4>
           <echart :options="line" class="fullwidth"></echart>
         </article>
       </div>

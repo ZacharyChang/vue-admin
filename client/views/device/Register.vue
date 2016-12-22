@@ -160,13 +160,13 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
-          <h4 class="title">User Register Percent</h4>
+          <h4 class="title">Device Register Percent</h4>
           <echart :options="pie" class="fullwidth"></echart>
         </article>
       </div>
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
-          <h4 class="title">User Register Count</h4>
+          <h4 class="title">Device Register Count</h4>
           <echart :options="line" class="fullwidth"></echart>
         </article>
       </div>
