@@ -382,7 +382,7 @@ export default {
       }
       if (this.version !== '_all') {
         condition.push({'term': {
-          'version.keyword': this.version
+          'system_version.keyword': this.version
         }})
       }
       return condition
@@ -455,6 +455,7 @@ export default {
   },
 
   mounted: function () {
+    this.getList()
     this.updateData()
   },
 
@@ -546,7 +547,9 @@ export default {
     },
     updateAll () {
       this.updateData()
-      this.updateCompareData()
+      if (this.isCompare) {
+        this.updateCompareData()
+      }
     },
     getList () {
       client.search({
