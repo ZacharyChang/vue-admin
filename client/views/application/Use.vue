@@ -202,7 +202,7 @@ export default {
 
   data () {
     return {
-      dateRange: null,
+      dateRange: util.thisWeekRange(),
       interval: 'day',
       pickerOptions: {
         disabledDate (time) {
@@ -245,6 +245,7 @@ export default {
       if (this.dateRange) {
         var end = new Date(this.dateRange[1])
         end.setDate(end.getDate() + 1)
+        end.setSeconds(end.getSeconds() - 1)
         return end
       }
     },
@@ -280,7 +281,7 @@ export default {
         'range': {
           'start_time': {
             'gte': this.dateStart,
-            'lt': this.dateEnd
+            'lte': this.dateEnd
           }
         }
       }]
@@ -493,7 +494,11 @@ export default {
               date_histogram: {
                 field: 'start_time',
                 interval: this.interval,
-                time_zone: util.timezone()
+                time_zone: util.timezone(),
+                extended_bounds: {
+                  min: this.dateStart,
+                  max: this.dateEnd
+                }
               },
               aggs: {
                 aggs_sum_duration: {
@@ -518,7 +523,11 @@ export default {
                   date_histogram: {
                     field: 'start_time',
                     interval: this.interval,
-                    time_zone: util.timezone()
+                    time_zone: util.timezone(),
+                    extended_bounds: {
+                      min: this.dateStart,
+                      max: this.dateEnd
+                    }
                   },
                   aggs: {
                     aggs_avg: {
