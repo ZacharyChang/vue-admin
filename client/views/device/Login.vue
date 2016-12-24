@@ -160,13 +160,13 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
-          <h4 class="title">Device Register Percent</h4>
+          <h4 class="title">Device Login Percent</h4>
           <echart :options="pie" class="fullwidth"></echart>
         </article>
       </div>
       <div class="tile is-parent is-6">
         <article class="tile is-child box">
-          <h4 class="title">Device Register Count</h4>
+          <h4 class="title">Device Login Count</h4>
           <echart :options="line" class="fullwidth"></echart>
         </article>
       </div>
@@ -227,7 +227,7 @@ export default {
   data () {
     return {
       isCompare: false,
-      dateRange: null,
+      dateRange: util.thisWeekRange(),
       compareDateRange: null,
       interval: 'day',
       manufacturerList: [],
@@ -268,6 +268,7 @@ export default {
       if (this.dateRange) {
         var end = new Date(this.dateRange[1])
         end.setDate(end.getDate() + 1)
+        end.setSeconds(end.getSeconds() - 1)
         return end
       }
     },
@@ -339,7 +340,7 @@ export default {
         'range': {
           '@timestamp': {
             'gte': this.dateStart,
-            'lt': this.dateEnd
+            'lte': this.dateEnd
           }
         }
       }]
@@ -355,7 +356,33 @@ export default {
       }
       if (this.version !== '_all') {
         condition.push({'term': {
-          'version.keyword': this.version
+          'system_version.keyword': this.version
+        }})
+      }
+      return condition
+    },
+    compareCondition () {
+      var condition = [{
+        'range': {
+          '@timestamp': {
+            'gte': this.compareDateStart,
+            'lt': this.compareDateEnd
+          }
+        }
+      }]
+      if (this.manufacturer !== '_all') {
+        condition.push({'term': {
+          'manufacturer.keyword': this.manufacturer
+        }})
+      }
+      if (this.model !== '_all') {
+        condition.push({'term': {
+          'model.keyword': this.model
+        }})
+      }
+      if (this.version !== '_all') {
+        condition.push({'term': {
+          'system_version.keyword': this.version
         }})
       }
       return condition
@@ -367,7 +394,7 @@ export default {
           formatter: '{a} <br/>{b} : {c} ({d}%)'
         },
         series: [{
-          name: 'register',
+          name: 'login',
           type: 'pie',
           radius: '60%',
           center: ['50%', '60%'],
@@ -405,7 +432,7 @@ export default {
         }],
         series: [
           {
-            name: 'Register',
+            name: 'Login',
             type: 'line',
             data: this.data
           }
@@ -415,8 +442,11 @@ export default {
   },
 
   watch: {
-    interval: 'updateData',
     dateRange: 'updateData',
+    interval: 'updateAll',
+    manufacturer: 'updateAll',
+    model: 'updateAll',
+    version: 'updateAll',
     compareDateRange: function (newVal, oldVal) {
       if (this.compareDateRange && this.compareDateRange[0]) {
         this.updateCompareData()
@@ -458,7 +488,11 @@ export default {
               date_histogram: {
                 field: '@timestamp',
                 interval: this.interval,
-                time_zone: util.timezone()
+                time_zone: util.timezone(),
+                extended_bounds: {
+                  min: this.dateStart,
+                  max: this.dateEnd
+                }
               }
             }
           }
@@ -486,7 +520,7 @@ export default {
           size: 0,
           query: {
             bool: {
-              must: this.condition
+              must: this.compareCondition
             }
           },
           aggs: {
@@ -505,17 +539,17 @@ export default {
         if (buckets.length === 0) {
           notify('warning', 'Warning', 'Received no data under the conditions you choose!')
         }
-        this.compareDataArray = []
-        buckets.forEach(bucket => {
-          this.compareDataArray.push(bucket.doc_count)
-        })
+        this.compareDataArray = buckets.map(bucket => bucket.doc_count)
       }, error => {
         notify('danger', 'Fail', 'Can not get data from server!')
         console.trace(error.message)
       })
     },
+    updateAll () {
+      this.updateData()
+      this.updateCompareData()
+    },
     getList () {
-      var that = this   // 保存Vue对象的指针，否则子函数中无法获取
       client.search({
         index: 'tms-*',
         type: 'login',
@@ -540,7 +574,7 @@ export default {
             },
             aggs_version: {
               terms: {
-                field: 'version.keyword',
+                field: 'system_version.keyword',
                 order: {
                   _term: 'asc'
                 }
@@ -549,8 +583,9 @@ export default {
           }
         }
       }).then(body => {
-        that.manufacturerList = body.aggregations.aggs_manufacturer.buckets.map(item => item.key)
-        that.modelList = body.aggregations.aggs_model.buckets.map(item => item.key)
+        this.manufacturerList = body.aggregations.aggs_manufacturer.buckets.map(item => item.key)
+        this.modelList = body.aggregations.aggs_model.buckets.map(item => item.key)
+        this.versionList = body.aggregations.aggs_version.buckets.map(item => item.key)
       }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)

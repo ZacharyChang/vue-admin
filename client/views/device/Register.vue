@@ -340,7 +340,7 @@ export default {
         'range': {
           '@timestamp': {
             'gte': this.dateStart,
-            'lt': this.dateEnd
+            'lte': this.dateEnd
           }
         }
       }]
@@ -366,7 +366,7 @@ export default {
         'range': {
           '@timestamp': {
             'gte': this.compareDateStart,
-            'lte': this.compareDateEnd
+            'lt': this.compareDateEnd
           }
         }
       }]
