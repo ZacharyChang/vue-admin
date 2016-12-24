@@ -261,7 +261,7 @@ export default {
       if (this.dateRange) {
         var end = new Date(this.dateRange[1])
         end.setDate(end.getDate() + 1)
-        end.setDate(end.getSeconds() - 1)
+        end.setSeconds(end.getSeconds() - 1)
         return end
       }
     },

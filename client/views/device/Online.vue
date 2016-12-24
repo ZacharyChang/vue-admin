@@ -168,7 +168,7 @@ export default {
 
   data () {
     return {
-      dateRange: null,
+      dateRange: util.thisDayRange(),
       interval: 'hour',
       pickerOptions: {
         disabledDate (time) {
@@ -209,6 +209,7 @@ export default {
       if (this.dateRange) {
         var end = new Date(this.dateRange[1])
         end.setDate(end.getDate() + 1)
+        end.setSeconds(end.getSeconds() - 1)
         return end
       }
     },
@@ -305,12 +306,7 @@ export default {
     interval: 'updateData',
     dateRange: 'updateData',
     manufacturer: 'updateData',
-    model: 'updateData',
-    compareDateRange: function (newVal, oldVal) {
-      if (this.compareDateRange && this.compareDateRange[0]) {
-        this.updateCompareData()
-      }
-    }
+    model: 'updateData'
   },
 
   mounted: function () {
@@ -337,8 +333,8 @@ export default {
                 {
                   'range': {
                     '@timestamp': {
-                      'gte': 'now/d',
-                      'lt': this.dateEnd
+                      'gte': this.dateStart,
+                      'lte': this.dateEnd
                     }
                   }
                 },
@@ -360,7 +356,11 @@ export default {
               date_histogram: {
                 field: '@timestamp',
                 interval: this.interval,
-                time_zone: util.timezone()
+                time_zone: util.timezone(),
+                extended_bounds: {
+                  min: this.dateStart,
+                  max: this.dateEnd
+                }
               },
               aggs: {
                 aggs_online: {
