@@ -183,7 +183,6 @@
 <script>
 import VbSwitch from 'vue-bulma-switch'
 import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
-import client from '../../elastic'
 import notify from '../../components/notification'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
 import * as util from '../../components/util'
@@ -479,7 +478,7 @@ export default {
       this.currentSize = val
     },
     updateData () {
-      client.search({
+      this.$http.post(util.elasticAPI, {
         index: 'tms-*',
         type: 'app_use',
         body: {
@@ -547,7 +546,8 @@ export default {
             }
           }
         }
-      }).then(body => {
+      }).then(res => {
+        let body = res.body
         notify('success', 'Success', 'Successfully received data from server!')
         let dateBuckets = body.aggregations.aggs_date.buckets
         if (dateBuckets.length === 0) {
@@ -597,7 +597,7 @@ export default {
       document.body.removeChild(link)
     },
     getList () {
-      client.search({
+      this.$http.post(util.elasticAPI, {
         index: 'tms-*',
         type: 'app_use',
         body: {
@@ -637,7 +637,8 @@ export default {
             }
           }
         }
-      }).then(body => {
+      }).then(res => {
+        let body = res.body
         this.manufacturerList = body.aggregations.aggs_manufacturer.buckets.map(item => item.key)
         this.modelList = body.aggregations.aggs_model.buckets.map(item => item.key)
         this.appList = body.aggregations.aggs_app.buckets.map(item => ({'value': item.key}))

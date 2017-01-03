@@ -58,3 +58,19 @@ export function paginationLayout () {
   }
   return 'total, sizes, prev, pager, next, jumper'
 }
+
+export function thisWeekRange () {
+  return [
+    moment().startOf('week'),
+    moment().startOf('day')
+  ]
+}
+
+export function thisDayRange () {
+  return [
+    moment().startOf('day'),
+    moment().startOf('day')
+  ]
+}
+
+export const elasticAPI = 'http://localhost:3000/elastic'

@@ -152,7 +152,6 @@
 <script>
 import VbSwitch from 'vue-bulma-switch'
 import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
-import client from '../../elastic'
 import notify from '../../components/notification'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
 import * as util from '../../components/util'
@@ -322,7 +321,7 @@ export default {
       this.currentSize = val
     },
     updateData () {
-      client.search({
+      this.$http.post(util.elasticAPI, {
         index: 'tms-*',
         type: 'online',
         body: {
@@ -377,7 +376,8 @@ export default {
             }
           }
         }
-      }).then(body => {
+      }).then(res => {
+        let body = res.body
         notify('success', 'Success', 'Successfully received data from server!')
         var buckets = body.aggregations.aggs_date.buckets
         if (buckets.length === 0) {
@@ -408,8 +408,7 @@ export default {
       document.body.removeChild(link)
     },
     getList () {
-      var that = this   // 保存Vue对象的指针，否则子函数中无法获取
-      client.search({
+      this.$http.post(util.elasticAPI, {
         index: 'tms-*',
         type: 'online',
         body: {
@@ -449,9 +448,10 @@ export default {
             }
           }
         }
-      }).then(body => {
-        that.manufacturerList = body.aggregations.aggs_manufacturer.buckets.map(item => item.key)
-        that.modelList = body.aggregations.aggs_model.buckets.map(item => item.key)
+      }).then(res => {
+        let body = res.body
+        this.manufacturerList = body.aggregations.aggs_manufacturer.buckets.map(item => item.key)
+        this.modelList = body.aggregations.aggs_model.buckets.map(item => item.key)
       }, error => {
         notify('danger', 'Fail', 'Can not receive data from server!')
         console.trace(error.message)

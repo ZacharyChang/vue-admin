@@ -76,7 +76,6 @@
 <script>
 import VbSwitch from 'vue-bulma-switch'
 import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
-import client from '../../elastic'
 import notify from '../../components/notification'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
 import { Tabs, TabPane } from 'vue-bulma-tabs'
@@ -182,7 +181,7 @@ export default {
       this.currentSize = val
     },
     updateData () {
-      client.search({
+      this.$http.post(util.elasticAPI, {
         index: 'tms-*',
         type: 'device_app',
         body: {
@@ -213,7 +212,8 @@ export default {
             }
           }
         }
-      }).then(body => {
+      }).then(res => {
+        let body = res.body
         notify('success', 'Success', 'Successfully received data from server!')
         let buckets = body.aggregations.aggs_app_name.buckets
         if (buckets.length === 0) {

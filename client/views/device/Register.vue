@@ -210,7 +210,6 @@
 <script>
 import VbSwitch from 'vue-bulma-switch'
 import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
-import client from '../../elastic'
 import notify from '../../components/notification'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
 import * as util from '../../components/util'
@@ -473,7 +472,7 @@ export default {
       }
     },
     updateData () {
-      client.search({
+      this.$http.post(util.elasticAPI, {
         index: 'tms-*',
         type: 'register',
         body: {
@@ -497,7 +496,8 @@ export default {
             }
           }
         }
-      }).then(body => {
+      }).then(res => {
+        let body = res.body
         notify('success', 'Success', 'Successfully received data from server!')
         var buckets = body.aggregations.aggs_date.buckets
         if (buckets.length === 0) {
@@ -513,7 +513,7 @@ export default {
       })
     },
     updateCompareData () {
-      client.search({
+      this.$http.post(util.elasticAPI, {
         index: 'tms-*',
         type: 'register',
         body: {
@@ -533,7 +533,8 @@ export default {
             }
           }
         }
-      }).then(body => {
+      }).then(res => {
+        let body = res.body
         notify('success', 'Success', 'Successfully got data from server!')
         var buckets = body.aggregations.aggs_date.buckets
         if (buckets.length === 0) {
@@ -552,7 +553,7 @@ export default {
       }
     },
     getList () {
-      client.search({
+      this.$http.post(util.elasticAPI, {
         index: 'tms-*',
         type: 'register',
         body: {
@@ -584,7 +585,8 @@ export default {
             }
           }
         }
-      }).then(body => {
+      }).then(res => {
+        let body = res.body
         this.manufacturerList = body.aggregations.aggs_manufacturer.buckets.map(item => item.key)
         this.modelList = body.aggregations.aggs_model.buckets.map(item => item.key)
         this.versionList = body.aggregations.aggs_version.buckets.map(item => item.key)
