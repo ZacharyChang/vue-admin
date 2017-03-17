@@ -161,7 +161,6 @@
 
 <script>
 import VbSwitch from 'vue-bulma-switch'
-import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
 import notify from '../../components/notification'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse'
 import * as util from '../../components/util'
@@ -171,7 +170,6 @@ export default {
 
   components: {
     VbSwitch,
-    echart: ECharts,
     Collapse,
     CollapseItem,
     Tabs,

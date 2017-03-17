@@ -8,6 +8,7 @@ import store from './store'
 import * as filters from './filters'
 import { TOGGLE_SIDEBAR } from 'vuex-store/mutation-types'
 import { DatePicker, Autocomplete, Pagination } from 'element-ui'
+import ECharts from 'vue2-echarts/src/ECharts/ECharts.vue'
 import lang from 'element-ui/lib/locale/lang/en'
 import locale from 'element-ui/lib/locale'
 
@@ -18,6 +19,8 @@ locale.use(lang)
 Vue.use(DatePicker)
 Vue.use(Autocomplete)
 Vue.use(Pagination)
+
+Vue.component('echart', ECharts)
 
 sync(store, router)
 
